@@ -55,5 +55,3 @@ Libraries: OpenPyXL, ReportLab, Werkzeug
 Purpose
 
 The goal of this project is to provide a secure, reliable, and efficient platform for school transportation management, ensuring better safety and communication between schools and parents.
-
-The goal of this project is to provide a secure, reliable, and efficient platform for school transportation management, ensuring better safety and communication between schools and parents.
