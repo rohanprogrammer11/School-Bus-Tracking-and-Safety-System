@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assign Driver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .col {
+            flex: 1;
+            min-width: 200px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            color: #fff;
+        }
+        .btn-primary { background: #0d6efd; }
+        .btn-secondary { background: #6c757d; }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        .alert {
+            background: #f8d7da;
+            color: #842029;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c2c7;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header-row">
+        <h3>➕ Assign Driver</h3>
+        <a href="{{ url_for('org.org_assignments_view') }}" class="btn btn-secondary">
+            📋 View Assignments
+        </a>
+    </div>
+
+    <!-- FLASH ALERTS -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert">⚠ {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- FORM -->
+    <form method="POST" class="card">
+
+        <!-- ASSIGNMENT ID -->
+        <div class="row">
+            <div class="col">
+                <label>Assignment ID</label>
+                <input type="text"
+                       name="assignment_code"
+                       placeholder="Enter Assignment ID"
+                       required>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:15px;">
+            <div class="col">
+                <label>Driver</label>
+                <select name="driver_id" id="driverSelect" required>
+                    {% for d in drivers %}
+                        {% if d.status == 'ACTIVE' %}
+                            <option value="{{ d.id }}">{{ d.name }}</option>
+                        {% else %}
+                            <option disabled>
+                                {{ d.name }} ({{ d.status }} – cannot assign)
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col">
+                <label>Bus</label>
+                <select name="bus_id" required>
+                    {% for b in buses %}
+                        {% if b.status == 'ACTIVE' %}
+                            <option value="{{ b.id }}">{{ b.bus_number }}</option>
+                        {% else %}
+                            <option disabled>
+                                {{ b.bus_number }} ({{ b.status }} – cannot assign)
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:15px;">
+            <div class="col">
+                <label>Route</label>
+                <select name="route_id" required>
+                    {% for r in routes %}
+                        <option value="{{ r.id }}">{{ r.route_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:15px;">
+            <div class="col">
+                <label>Assignment Type</label>
+                <select name="assignment_type" id="assignmentType" required>
+                    <option value="PICKUP">🟢 Pickup</option>
+                    <option value="DROP">🔵 Drop</option>
+                    <option value="BOTH">🟣 Pickup + Drop</option>
+                </select>
+            </div>
+
+            <div class="col">
+                <label>Date</label>
+                <input type="date"
+                       name="date"
+                       id="dateSelect"
+                       value="{{ today }}"
+                       required>
+            </div>
+
+            <div class="col">
+                <label>Repeat Type</label>
+                <select name="repeat_type">
+                    <option value="NONE">No Repeat</option>
+                    <option value="WEEKLY">Weekly</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary">Assign</button>
+            <a href="{{ url_for('org.org_assignments_view') }}" class="btn btn-secondary">
+                Back
+            </a>
+        </div>
+    </form>
+
+</div>
+
+<!-- AUTO-DISABLE INVALID ASSIGNMENT TYPES -->
+<script>
+const dailyAssignments = {{ daily_assignments | default({}) | tojson }};
+
+function updateAssignmentOptions() {
+    const driverId = document.getElementById("driverSelect").value;
+    const assignmentSelect = document.getElementById("assignmentType");
+    const assigned = dailyAssignments[driverId] || [];
+
+    for (let option of assignmentSelect.options) {
+        option.disabled = false;
+
+        if (option.value === "PICKUP") {
+            option.disabled = assigned.includes("PICKUP");
+        }
+        if (option.value === "DROP") {
+            option.disabled = assigned.includes("DROP");
+        }
+        if (option.value === "BOTH") {
+            option.disabled = assigned.includes("PICKUP") && assigned.includes("DROP");
+        }
+    }
+}
+
+document.getElementById("driverSelect").addEventListener("change", updateAssignmentOptions);
+document.getElementById("dateSelect").addEventListener("change", updateAssignmentOptions);
+window.onload = updateAssignmentOptions;
+</script>
+
+</body>
+</html>

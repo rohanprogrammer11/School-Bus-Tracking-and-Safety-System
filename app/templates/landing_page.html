@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>School Bus Safety System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #343a40;
+            font-size: 36px;
+        }
+
+        p.subtitle {
+            margin-bottom: 40px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .role-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .role-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.15);
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .role-title {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #212529;
+            font-weight: bold;
+        }
+
+        .role-desc {
+            font-size: 15px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>School Bus Safety & Tracking System</h1>
+    <p class="subtitle">Please select who you are</p>
+
+    <div class="role-grid">
+
+        <!-- ✅ ORGANIZATION (FIXED) -->
+        <a href="/login" class="role-card">
+            <div class="icon">🏫</div>
+            <div class="role-title">Organization</div>
+            <div class="role-desc">
+                Manage buses, drivers, routes, and students.
+            </div>
+        </a>
+
+        <!-- PARENT -->
+        <a href="/parent/login" class="role-card">
+            <div class="icon">👨‍👩‍👧</div>
+            <div class="role-title">Parent</div>
+            <div class="role-desc">
+                Track your child’s bus and safety alerts.
+            </div>
+        </a>
+
+        <!-- DRIVER -->
+        <a href="/driver/login" class="role-card">
+            <div class="icon">🚌</div>
+            <div class="role-title">Driver</div>
+            <div class="role-desc">
+                View assigned routes and students.
+            </div>
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>

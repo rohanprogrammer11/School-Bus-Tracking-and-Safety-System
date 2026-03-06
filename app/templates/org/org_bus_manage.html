@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bus Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            margin: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-toggle {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-toggle:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        thead th {
+            background-color: #212529;
+            color: #fff;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .badge-active {
+            background-color: #28a745;
+        }
+
+        .badge-inactive {
+            background-color: #dc3545;
+        }
+
+        .badge-maintenance {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .mt-3 {
+            margin-top: 15px;
+        }
+
+        .me-1 {
+            margin-right: 6px;
+        }
+        .btn-report {
+    background: linear-gradient(135deg, #0d6efd, #2563eb);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(13,110,253,0.25);
+    transition: all 0.25s ease;
+    border: none;
+}
+
+.btn-report:hover {
+    background: linear-gradient(135deg, #0b5ed7, #1e40af);
+    box-shadow: 0 6px 16px rgba(13,110,253,0.35);
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.btn-report:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(13,110,253,0.25);
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/org/dashboard" class="btn btn-secondary mt-3">
+        ⬅ Back
+    </a>
+
+    <div class="page-header">
+        <h3>🚌 Bus Management</h3>
+
+        <div>
+            <a href="/org/fuel-price" class="btn btn-secondary me-1">
+                ⛽ Fuel Price
+            </a>
+
+           <a href="/org/reports/fuel-monthly" class="btn btn-report me-1">📊 Monthly Fuel Report</a>
+
+
+            <a href="/org/buses/add" class="btn btn-primary">
+                ➕ Add Bus
+            </a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Bus Code</th>
+                <th>Bus Number</th>
+                <th>Bus Model</th>
+                <th>Capacity</th>
+                <th>Fuel</th>
+                <th>Fuel Price</th>
+                <th>Mileage</th>
+                <th>Status</th>
+                <th style="width:220px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in buses %}
+            <tr>
+                <td><strong>{{ b.bus_code }}</strong></td>
+                <td>{{ b.bus_number }}</td>
+                <td>{{ b.bus_model }}</td>
+                <td>{{ b.capacity }}</td>
+                <td><strong>{{ b.fuel_type }}</strong></td>
+                <td>
+                    {% if b.fuel_price %}
+                        ₹ {{ b.fuel_price }}
+                    {% else %}
+                        <span style="color:#999;">Not Set</span>
+                    {% endif %}
+                </td>
+                <td>{{ b.mileage_kmpl }} km</td>
+
+                <td>
+                    {% if b.status == 'ACTIVE' %}
+                        <span class="badge badge-active">ACTIVE</span>
+                    {% elif b.status == 'INACTIVE' %}
+                        <span class="badge badge-inactive">INACTIVE</span>
+                    {% else %}
+                        <span class="badge badge-maintenance">MAINTENANCE</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/org/buses/{{ b.id }}/edit"
+                    class="btn btn-sm btn-primary me-1">
+                        Edit
+                    </a>
+
+                    <a href="/org/buses/{{ b.id }}/toggle"
+                       class="btn btn-sm btn-toggle me-1">
+                        Toggle Status
+                    </a>
+
+                    <a href="/org/buses/{{ b.id }}/delete"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this bus?');">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+</div>
+
+</body>
+</html>

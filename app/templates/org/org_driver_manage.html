@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+
+        h3 { margin: 0; }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary { background-color: #0d6efd; color: #fff; }
+        .btn-secondary { background-color: #6c757d; color: #fff; }
+        .btn-warning { background-color: #ffc107; color: #000; }
+        .btn-danger { background-color: #dc3545; color: #fff; }
+        .btn-info { background-color: #0dcaf0; color: #000; }
+        .btn-dark { background-color: #212529; color: #fff; }
+
+        .btn-sm { padding: 6px 10px; font-size: 13px; }
+        .btn:hover { opacity: 0.9; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        thead {
+            background-color: #212529;
+            color: #fff;
+        }
+
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .bg-success { background-color: #198754; color: #fff; }
+        .bg-warning { background-color: #ffc107; color: #000; }
+        .bg-danger { background-color: #dc3545; color: #fff; }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .details-row {
+            display: none;
+            background-color: #fdfdfd;
+        }
+
+        .details-box {
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .reset-box {
+            margin-top: 12px;
+        }
+
+        .reset-box input {
+            padding: 6px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .alert {
+            padding: 10px 14px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .alert-danger { background-color: #f8d7da; color: #842029; }
+        .alert-success { background-color: #d1e7dd; color: #0f5132; }
+    </style>
+
+    <script>
+        function toggleDetails(id) {
+            const row = document.getElementById("details-" + id);
+            if (!row) return;
+
+            row.style.display = (row.style.display === "table-row")
+                ? "none"
+                : "table-row";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <a href="/org/dashboard" class="btn btn-secondary" style="margin-top:15px;">⬅ Back</a>
+
+    {% with messages = get_flashed_messages(with_categories=true, category_filter=['driver-success','driver-danger']) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category.replace('driver-', 'alert-') }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h3>🚍 Driver Management</h3>
+    <div style="display:flex; gap:8px;">
+        <a href="/org/drivers/download/excel" class="btn btn-success">📊 Excel</a>
+        <a href="/org/drivers/download/pdf" class="btn btn-danger">📄 PDF</a>
+        <a href="/org/drivers/add" class="btn btn-primary">➕ Add Driver</a>
+    </div>
+</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Driver Code</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>License</th>
+                <th>Status</th>
+                <th style="width: 320px;">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for d in drivers %}
+        <tr>
+            
+            <td>
+                {% if d.photo_path %}
+                    <img src="{{ url_for('static', filename=d.photo_path) }}"
+                        width="60"
+                        height="60"
+                        style="border-radius:50%; object-fit:cover;">
+                {% else %}
+                    <img src="{{ url_for('static', filename='default-user.png') }}"
+                        width="60"
+                        height="60">
+                {% endif %}
+            </td>
+            <td><strong>{{ d.driver_code }}</strong></td>
+            <td>{{ d.name }}</td>
+            <td>{{ d.phone }}</td>
+            <td>{{ d.license_number }}</td>
+            <td>
+                {% if d.status == 'ACTIVE' %}
+                    <span class="badge bg-success">ACTIVE</span>
+                {% elif d.status == 'INACTIVE' %}
+                    <span class="badge bg-warning">INACTIVE</span>
+                {% else %}
+                    <span class="badge bg-danger">SUSPENDED</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="btn-group">
+                    <button type="button" onclick="toggleDetails('{{ d.id }}')" class="btn btn-sm btn-info">More Details</button>
+                    <a href="/org/drivers/{{ d.id }}/edit" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="/org/drivers/{{ d.id }}/toggle" class="btn btn-sm btn-warning">Toggle</a>
+                    <form method="POST" action="/org/drivers/{{ d.id }}/delete" style="display:inline;">
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+
+        <tr id="details-{{ d.id }}" class="details-row">
+            <td colspan="7">
+                <div class="details-box">
+
+                    <strong>Additional Driver Details</strong>
+                    <hr>
+
+                    <p><strong>Driver Code:</strong> {{ d.driver_code }}</p>
+                    <p><strong>License Type:</strong> {{ d.license_type or 'N/A' }}</p>
+                    <p><strong>Experience:</strong> {{ d.experience_years or 'N/A' }} years</p>
+                    <p><strong>License Expiry:</strong> {{ d.license_expiry or 'N/A' }}</p>
+                    <p><strong>Blood Group:</strong> {{ d.blood_group or 'N/A' }}</p>
+                    <p><strong>Emergency Contact:</strong> {{ d.emergency_contact or 'N/A' }}</p>
+
+                    <hr>
+                    <strong>Assignment Details</strong>
+
+                    <p><strong>Bus Code:</strong> {{ d.bus_code or 'N/A' }}</p>
+                    <p><strong>Bus Number:</strong> {{ d.bus_number or 'N/A' }}</p>
+                    <p><strong>Route Name:</strong> {{ d.route_name or 'N/A' }}</p>
+                    <p><strong>Pickup Point:</strong> {{ d.start_point or 'N/A' }}</p>
+                    <p><strong>Drop Point:</strong> {{ d.end_point or 'N/A' }}</p>
+                    <p><strong>Assignment Date:</strong> {{ d.assignment_date or 'N/A' }}</p>
+
+                    <hr>
+                    <strong>Driver Documents</strong>
+
+                    <p>
+                        <strong>License:</strong>
+                        {% if d.license_pdf %}
+    <a href="{{ url_for('static', filename=d.license_pdf) }}"
+       target="_blank"
+       class="btn btn-info btn-sm">
+        View License
+    </a>
+{% else %}
+    N/A
+{% endif %}
+                    </p>
+
+                    <p>
+                        <strong>Aadhar:</strong>
+                        {% if d.aadhar_pdf %}
+    <a href="{{ url_for('static', filename=d.aadhar_pdf) }}" target="_blank" class="btn btn-info btn-sm">
+        View Aadhar
+    </a>
+{% else %}
+    N/A
+{% endif %}
+                    </p>
+
+                    <p>
+                        <strong>Medical:</strong>
+                        {% if d.medical_pdf %}
+                            <a href="{{ url_for('static', filename=d.medical_pdf) }}" target="_blank" class="btn btn-info btn-sm">View Medical</a>
+                        {% else %} N/A {% endif %}
+                    </p>
+
+                    <div class="reset-box">
+                        <form method="POST" action="/org/drivers/{{ d.id }}/reset-password">
+                            <input type="password" name="new_password" placeholder="New Password" required>
+                            <button type="submit" class="btn btn-sm btn-dark">Reset Password</button>
+                        </form>
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

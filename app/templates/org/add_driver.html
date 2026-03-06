@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Driver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        h3 {
+            margin-bottom: 15px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .mb-3 {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input{
+            width: 96%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #6c757d;
+            user-select: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #198754;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+        }
+
+                        /* PASSWORD TOGGLE */
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 10px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 70%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+    </style>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const icon = document.getElementById("toggleIcon");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.src = "{{ url_for('static', filename='images/eye-open.png') }}";
+            } else {
+                passwordInput.type = "password";
+                icon.src = "{{ url_for('static', filename='images/eye-closed.png') }}";
+            }
+        }
+
+
+        // -----------------
+        function previewPhoto(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById('photoPreview');
+                output.src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        //----------------
+        let selectedPhotoURL = null;
+
+    function showViewButton() {
+        const fileInput = document.getElementById("photoInput");
+
+        if (fileInput.files && fileInput.files[0]) {
+            selectedPhotoURL = URL.createObjectURL(fileInput.files[0]);
+            document.getElementById("viewPhotoBtn").style.display = "inline-block";
+        }
+    }
+
+    function openPhotoPreview() {
+        if (selectedPhotoURL) {
+            window.open(selectedPhotoURL, "_blank");
+        }
+    }
+
+
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <h3>➕ Add New Driver</h3>
+
+    <!-- IMPORTANT -->
+    <form method="POST" enctype="multipart/form-data" class="form-card">
+
+        <div class="mb-3">
+            <label>Driver Photo</label>
+            <input type="file" name="photo" accept="image/*" id="photoInput" onchange="showViewButton()">
+
+            <div style="margin-top:10px;">
+                <button type="button"
+                        id="viewPhotoBtn"
+                        class="btn btn-secondary"
+                        style="display:none;"
+                        onclick="openPhotoPreview()">
+                    👁 View Selected Photo
+                </button>
+            </div>
+        </div>
+
+
+        <div class="mb-3">
+            <label>Driver Name</label>
+            <input type="text" name="name" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Phone</label>
+            <input type="text" name="phone" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Driver Code</label>
+            <input type="text" name="driver_code" required placeholder="e.g. DRV-001">
+        </div>
+
+        <div class="mb-3">
+            <label>Driver Password</label>
+            <input type="password" name="password" id="password" required>
+            <img
+                    src="{{ url_for('static', filename='images/eye-closed.png') }}"
+                    id="toggleIcon"
+                    class="toggle-password"
+                    onclick="togglePassword()"
+                    alt="Toggle Password"
+                >
+            
+        </div>
+
+        <div class="mb-3">
+            <label>License Number</label>
+            <input type="text" name="license_number" required>
+        </div>
+
+        <div class="mb-3">
+            <label>License Type</label>
+            <select name="license_type">
+                <option value="">Select License Type</option>
+                <option value="LMV">LMV (Light Motor Vehicle)</option>
+                <option value="HMV">HMV (Heavy Motor Vehicle)</option>
+                <option value="HTV">HTV (Heavy Transport Vehicle)</option>
+                <option value="PSV">PSV (Passenger Service Vehicle)</option>
+                <option value="School Bus">School Bus</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>License Expiry</label>
+            <input type="date" name="license_expiry" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Experience (Years)</label>
+            <input type="number" name="experience_years" min="0">
+        </div>
+
+        <div class="mb-3">
+            <label>Blood Group</label>
+            <select name="blood_group">
+                <option value="">Select Blood Group</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option>
+                <option>AB+</option><option>AB-</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Emergency Contact</label>
+            <input type="text" name="emergency_contact">
+        </div>
+
+        <hr>
+
+        <!-- DRIVER DOCUMENTS -->
+
+        <div class="mb-3">
+            <label>Driving License (PDF)</label>
+            <input type="file" name="license_pdf" accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+
+        <div class="mb-3">
+            <label>Aadhaar Card Number</label>
+            <input type="text" name="aadhar_doc_number">
+        </div>
+
+        <div class="mb-3">
+            <label>Aadhaar Card PDF</label>
+            <input type="file" name="aadhar_pdf" accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+
+        <div class="mb-3">
+            <label>Medical Certificate (PDF)</label>
+            <input type="file" name="medical_pdf" accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+
+       <div class="mb-3">
+    <label>Monthly Salary</label>
+    <input type="number"
+           name="monthly_salary"
+           step="0.01"
+           min="0"
+           required
+           placeholder="Enter monthly salary">
+</div>
+
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-success">Save Driver</button>
+            <a href="/org/drivers" class="btn btn-secondary">Cancel</a>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>

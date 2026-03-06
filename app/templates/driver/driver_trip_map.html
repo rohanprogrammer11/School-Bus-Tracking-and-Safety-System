@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Trip Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- LEAFLET CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- LEAFLET JS -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+    
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .stop-label {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+    const assignmentId = {{ assignment_id }};
+    const routeStops = {{ stops | tojson }};
+</script>
+
+<script>
+    const busId = {{ bus_id }};
+</script>
+
+
+<script src="{{ url_for('static', filename='js/driver_map.js') }}"></script>
+
+<script>
+let liveTrackingId = null;
+
+/* ===============================
+   START LIVE GPS TRACKING
+================================ */
+function startLiveTracking() {
+
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported");
+        return;
+    }
+
+    if (liveTrackingId !== null) {
+        console.log("⚠️ Live tracking already running");
+        return;
+    }
+
+    console.log("📡 Live GPS started");
+
+    liveTrackingId = navigator.geolocation.watchPosition(
+        position => {
+            console.log(
+                "📍 GPS:",
+                position.coords.latitude,
+                position.coords.longitude
+            );
+
+            fetch("/driver/location-update", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    bus_id: "{{ bus_id }}",
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    speed: position.coords.speed || 0
+                })
+            });
+        },
+        error => {
+            console.error("GPS error:", error);
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
+        }
+    );
+}
+
+/* ===============================
+   STOP LIVE GPS TRACKING
+================================ */
+function stopLiveTracking() {
+
+    if (liveTrackingId !== null) {
+        navigator.geolocation.clearWatch(liveTrackingId);
+        liveTrackingId = null;
+        console.log("🛑 Live GPS stopped");
+    }
+}
+</script>
+
+<script>
+    startLiveTracking();
+</script>
+
+
+</body>
+</html>

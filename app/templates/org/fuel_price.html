@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fuel Price Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body{
+            margin:0;
+            background:#f8f9fa;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        .container{
+            max-width:900px;
+            margin:40px auto;
+            padding:0 15px;
+        }
+
+        .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+        }
+
+        h3{
+            margin:0;
+        }
+
+        .btn{
+            padding:8px 14px;
+            border-radius:4px;
+            text-decoration:none;
+            font-size:14px;
+            border:none;
+            cursor:pointer;
+        }
+
+        .btn-primary{ background:#0d6efd; color:#fff; }
+        .btn-secondary{ background:#6c757d; color:#fff; }
+
+        .card{
+            background:#fff;
+            border-radius:6px;
+            padding:20px;
+            margin-bottom:25px;
+            box-shadow:0 2px 8px rgba(0,0,0,.08);
+        }
+
+        label{
+            font-weight:bold;
+            display:block;
+            margin-top:10px;
+        }
+
+        select, input{
+            width:100%;
+            padding:8px;
+            margin-top:5px;
+            border:1px solid #ced4da;
+            border-radius:4px;
+        }
+
+        button{
+            margin-top:15px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:#fff;
+        }
+
+        th, td{
+            padding:12px;
+            border:1px solid #dee2e6;
+            text-align:left;
+        }
+
+        thead th{
+            background:#212529;
+            color:#fff;
+        }
+
+        tr:hover{
+            background:#f1f1f1;
+        }
+
+        .badge{
+            padding:4px 10px;
+            border-radius:12px;
+            font-size:12px;
+            font-weight:bold;
+            color:#fff;
+        }
+
+        .diesel{ background:#198754; }
+        .petrol{ background:#dc3545; }
+        .cng{ background:#0dcaf0; color:#000; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/org/buses" class="btn btn-secondary">⬅ Back to Buses</a>
+    <br><br>
+
+    <div class="header">
+        <h3>⛽ Fuel Price Management</h3>
+    </div>
+
+    <!-- ================= ADD / UPDATE PRICE ================= -->
+    <div class="card">
+        <h4>Add / Update Fuel Price</h4>
+
+        <form method="post" action="/org/fuel-price/save">
+
+            <label>Fuel Type</label>
+            <select name="fuel_type" required>
+                <option value="">-- Select Fuel --</option>
+                <option value="DIESEL">Diesel</option>
+                <option value="PETROL">Petrol</option>
+                <option value="CNG">CNG</option>
+            </select>
+
+            <label>Price per Unit (₹)</label>
+            <input type="number" step="0.01" name="price_per_unit" required>
+
+            <label>Effective From</label>
+            <input type="date" name="effective_from" required>
+
+            <button type="submit" class="btn btn-primary">
+                💾 Save Fuel Price
+            </button>
+
+        </form>
+    </div>
+
+    <!-- ================= PRICE HISTORY ================= -->
+    <div class="card">
+        <h4>Fuel Price History</h4>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fuel Type</th>
+                    <th>Price (₹)</th>
+                    <th>Effective From</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in prices %}
+                <tr>
+                    <td>
+                        {% if p.fuel_type == 'DIESEL' %}
+                            <span class="badge diesel">DIESEL</span>
+                        {% elif p.fuel_type == 'PETROL' %}
+                            <span class="badge petrol">PETROL</span>
+                        {% else %}
+                            <span class="badge cng">CNG</span>
+                        {% endif %}
+                    </td>
+                    <td>₹ {{ p.price_per_unit }}</td>
+                    <td>{{ p.effective_from }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align:center;color:#888;">
+                        No fuel price set yet
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

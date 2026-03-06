@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Route</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #212529;
+            color: #ffffff;
+            padding: 15px;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        small {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background-color: #198754;
+            color: #ffffff;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <div class="card-header">
+            <h5>➕ Add Route</h5>
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+
+                <!-- ✅ REQUIRED: ROUTE CODE -->
+                <div class="form-group">
+                    <label>Route Code</label>
+                    <input type="text"
+                           name="route_code"
+                           placeholder="e.g. R-01"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>Route Name</label>
+                    <input type="text"
+                           name="route_name"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>Start Point</label>
+                    <input type="text"
+                           name="start_point"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>End Point</label>
+                    <input type="text"
+                           name="end_point"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>Pickup Time (Morning)</label>
+                    <input type="time"
+                           name="start_time"
+                           required>
+                    <small>Shown in 12-hour format after save</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Drop Time (School Leaving)</label>
+                    <input type="time"
+                           name="drop_time"
+                           required>
+                </div>
+
+                <div class="btn-row">
+                    <a href="/org/routes" class="btn btn-secondary">⬅ Back</a>
+                    <button type="submit" class="btn btn-success">➕ Add Route</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

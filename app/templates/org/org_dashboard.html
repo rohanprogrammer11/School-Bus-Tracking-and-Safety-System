@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Organization Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ================= BASE ================= */
+*{
+    box-sizing:border-box;
+    font-family:"Segoe UI",Roboto,Arial,sans-serif
+}
+body{
+    margin:0;
+    background:#f4f6f9;
+    color:#1f2937
+}
+
+/* ================= NAVBAR ================= */
+.navbar{
+    background:#111827;
+    color:#fff;
+    padding:14px 26px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 6px 18px rgba(0,0,0,.35)
+}
+.brand{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.3px
+}
+
+/* ================= BURGER ================= */
+.burger-wrapper{position:relative;cursor:pointer}
+.burger{
+    width:30px;
+    height:22px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between
+}
+.burger span{
+    height:3px;
+    width:100%;
+    background:#fff;
+    border-radius:3px;
+    transition:.3s
+}
+.burger.active span:nth-child(1){
+    transform:rotate(45deg) translate(5px,5px)
+}
+.burger.active span:nth-child(2){opacity:0}
+.burger.active span:nth-child(3){
+    transform:rotate(-45deg) translate(5px,-5px)
+}
+
+/* 🔴 Notification dot */
+.notif-dot{
+    position:absolute;
+    top:-6px;
+    right:-6px;
+    background:#ef4444;
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    min-width:18px;
+    height:18px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 0 2px #111827
+}
+
+/* ================= SIDE MENU ================= */
+.side-menu{
+    position:fixed;
+    top:0;
+    right:-320px;                 /* hidden by default */
+    width:300px;
+    height:100vh;
+    background:#ffffff;
+    box-shadow:-10px 0 30px rgba(0,0,0,.25);
+    transition:right .3s ease;
+    z-index:2000;
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+}
+.side-menu.open{
+    right:0;                      /* slide in */
+}
+.side-menu-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px solid #e5e7eb;
+    margin-bottom:18px;
+    font-size:16px;
+    font-weight:700;
+}
+
+.close-btn{
+    background:transparent;
+    border:none;
+    width:18px;          /* ⬅ narrow */
+    height:18px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:700;
+    line-height:1;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#374151;
+}
+
+.close-btn:hover{
+    color:#111827;
+}
+
+.side-menu button{
+    width:100%;
+    padding:12px 14px;
+    margin-bottom:12px;
+    border:none;
+    background:#f3f4f6;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:.2s
+}
+.side-menu button:hover{
+    background:#e5e7eb
+}
+
+/* Badge inside side menu */
+.notif-badge{
+    background:#ef4444;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-left:auto
+}
+
+/* Backdrop */
+.menu-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.25);
+    display:none;
+    z-index:1500
+}
+.menu-backdrop.show{display:block}
+
+/* ================= CONTAINER ================= */
+.container{
+    max-width:1200px;
+    margin:45px auto;
+    padding:0 24px
+}
+.container h2{
+    font-size:26px;
+    margin-bottom:32px;
+    font-weight:700
+}
+
+/* ================= GRID ================= */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:26px
+}
+
+/* ================= CARD ================= */
+.card{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 12px 26px rgba(0,0,0,.08);
+    padding:28px;
+    text-align:center;
+    transition:.25s ease
+}
+.card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 20px 42px rgba(0,0,0,.14)
+}
+
+/* ⬆️ Increased font sizes */
+.card h5{
+    margin-bottom:12px;
+    font-size:20px;
+    font-weight:700
+}
+.card p{
+    font-size:15px;
+    color:#6b7280;
+    margin-bottom:22px
+}
+
+/* ================= BUTTONS ================= */
+.btn{
+    padding:10px 18px;
+    border-radius:8px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    color:#fff;
+    display:inline-block
+}
+.btn-primary{background:#2563eb}
+.btn-success{background:#16a34a}
+.btn-warning{background:#facc15;color:#000}
+.btn-route{background:#9ca3af}
+.btn-class{
+    background:#0ea5e9;               /* Sky Blue */
+}
+.btn-student{
+    background:#9800af;               /* Pink */
+}
+.btn-driver{
+    background:#f97316;               /* Orange */
+}
+.btn-history{
+    background:#6366f1;               /* Indigo */
+}
+
+/* ================= TABLE ================= */
+table{
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 10px 22px rgba(0,0,0,.08)
+}
+thead{
+    background:#111827;
+    color:#fff
+}
+td,th{
+    padding:12px;
+    font-size:14px
+}
+
+/* ================= LIVE BUS STATUS ================= */
+
+.live-section{
+    margin-top:40px;
+}
+
+.live-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:18px;
+}
+
+.table-wrapper{
+    background:#fff;
+    border-radius:14px;
+    box-shadow:0 12px 26px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+
+/* Modern table */
+.live-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.live-table thead{
+    background:#111827;
+    color:#fff;
+}
+
+.live-table th{
+    text-align:left;
+    padding:14px 18px;
+    font-size:14px;
+    font-weight:600;
+}
+
+.live-table td{
+    padding:14px 18px;
+    font-size:14px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:middle;
+}
+
+/* Last row border fix */
+.live-table tr:last-child td{
+    border-bottom:none;
+}
+
+/* Status pill */
+.status-pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.3px;
+}
+
+.status-running{background:#dcfce7;color:#166534}
+.status-idle{background:#fef3c7;color:#92400e}
+.status-offline{background:#fee2e2;color:#991b1b}
+
+/* Map link */
+.map-link{
+    color:#2563eb;
+    font-weight:600;
+    text-decoration:none;
+}
+.map-link:hover{
+    text-decoration:underline;
+}
+
+/* Empty state */
+.no-data{
+    text-align:center;
+    padding:18px;
+    color:#6b7280;
+    font-style:italic;
+}
+
+/* Mobile responsive */
+@media(max-width:768px){
+    .live-table thead{display:none}
+
+    .live-table tr{
+        display:block;
+        padding:14px;
+    }
+
+    .live-table td{
+        display:flex;
+        justify-content:space-between;
+        padding:8px 0;
+        border:none;
+    }
+
+    .live-table td::before{
+        content:attr(data-label);
+        font-weight:600;
+        color:#374151;
+    }
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: all .25s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.dashboard-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dashboard-card p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 15px;
+}
+
+.btn-dark {
+  background: #111827;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+    <div class="brand">🚌 School Bus Safety</div>
+
+    <div class="burger-wrapper" onclick="toggleMenu()">
+        <div class="burger" id="burgerBtn">
+            <span></span><span></span><span></span>
+        </div>
+        <span id="notifDot" class="notif-dot" style="display:none"></span>
+    </div>
+</div>
+
+<div class="menu-backdrop" id="menuBackdrop" onclick="toggleMenu()"></div>
+
+<!-- ================= SIDE MENU ================= -->
+<div class="side-menu" id="sideMenu">
+    <div class="side-menu-header">
+        Organization Menu
+        <button class="close-btn" onclick="toggleMenu()">×</button>
+    </div>
+
+    <button onclick="location.href='/org/notifications'" class="notif-btn">
+        🔔 Notifications
+        <span id="notifBadge" class="notif-badge" style="display:none"></span>
+    </button>
+
+    <button onclick="location.href='/org/send-notice'">📢 Send Notice</button>
+    <button onclick="location.href='/org/profile'">👤 Profile</button>
+    <button onclick="location.href='/logout'">🚪 Logout</button>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div class="container">
+<h2>Welcome, {{ org_name }} 👋 (UDISE Code: {{ udise_code }})</h2>
+
+<div class="grid">
+
+<div class="card">
+    <h5>🚍 Driver Management</h5>
+    <p>Add, view, and manage drivers</p>
+    <a href="/org/drivers" class="btn btn-primary">Manage Drivers</a>
+</div>
+
+<div class="card">
+    <h5>🚌 Bus Management</h5>
+    <p>Register and manage buses</p>
+    <a href="/org/buses" class="btn btn-success">Manage Buses</a>
+</div>
+
+<div class="card">
+    <h5>📍 Driver Assignment</h5>
+    <p>View and assign drivers to buses and routes</p>
+    <a href="/org/assignments" class="btn btn-warning">View Assignments</a>
+</div>
+
+<div class="card">
+    <h5>🗺️ Route Management</h5>
+    <p>Register and manage routes</p>
+    <a href="/org/routes" class="btn btn-route">Manage Routes</a>
+</div>
+
+<div class="card">
+    <h5>🏫 Class Management</h5>
+    <p>Register and manage classes</p>
+    <a href="/org/classes" class="btn btn-class">Class Management</a>
+</div>
+
+<div class="card">
+    <h5>🎒 Student Management</h5>
+    <p>Register and manage students</p>
+    <a href="/org/students" class="btn btn-student">Student Management</a>
+</div>
+
+<div class="card">
+    <h5>🗓️ Driver Attendance</h5>
+    <p>Register and manage attendance</p>
+    <a href="/org/driver-attendance" class="btn btn-driver">Driver Attendance</a>
+</div>
+
+
+<div class="card">
+    <h5>🗓️ Student History (Pickup/drop)</h5>
+    <p>See the Student Pickup/drop history</p>
+    <a href="/org/student-history" class="btn btn-history">Driver Attendance</a>
+</div>
+
+<div class="dashboard-card">
+  <div class="card-icon">📊</div>
+  <h3>Daily Report</h3>
+  <p>View daily bus, driver & route reports</p>
+  <a href="/org/daily-reports" class="btn btn-dark">
+    View Reports
+  </a>
+</div>
+
+</div>
+
+<hr style="margin:48px 0">
+
+<div class="live-section">
+    <div class="live-title">
+        🚌 Live Bus Status
+    </div>
+
+    <div class="table-wrapper">
+        <table class="live-table">
+            <thead>
+                <tr>
+                    <th>Bus</th>
+                    <th>Driver</th>
+                    <th>Status</th>
+                    <th>Last Update</th>
+                    <th>Map</th>
+                </tr>
+            </thead>
+            <tbody id="liveBusBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ================= SCRIPTS (UNCHANGED LOGIC) ================= -->
+<script>
+function toggleMenu(){
+    sideMenu.classList.toggle("open");
+    burgerBtn.classList.toggle("active");
+    menuBackdrop.classList.toggle("show");
+}
+
+function loadNotificationCount(){
+    fetch("/org/notifications?count=1",{credentials:"same-origin"})
+    .then(res=>res.json())
+    .then(data=>{
+        const badge=document.getElementById("notifBadge");
+        const dot=document.getElementById("notifDot");
+        const btn=document.querySelector(".notif-btn");
+        const burger=document.getElementById("burgerBtn");
+
+        if(data.unread>0){
+            badge.style.display="inline-block";
+            badge.textContent=data.unread;
+            dot.style.display="flex";
+            dot.textContent=data.unread;
+            btn.classList.add("alert");
+            burger.classList.add("alert");
+        }else{
+            badge.style.display="none";
+            dot.style.display="none";
+            btn.classList.remove("alert");
+            burger.classList.remove("alert");
+        }
+    });
+}
+loadNotificationCount();
+setInterval(loadNotificationCount,10000);
+</script>
+
+<script>
+function loadLiveBusStatus(){
+    fetch("/org/api/live-bus-status",{credentials:"same-origin"})
+    .then(res=>res.json())
+    .then(data=>{
+        const body=document.getElementById("liveBusBody");
+        body.innerHTML="";
+        if(!data.length){
+    body.innerHTML=`
+    <tr>
+        <td colspan="5" class="no-data">
+            No live bus data available
+        </td>
+    </tr>`;
+    return;
+}
+
+        data.forEach(bus=>{
+    const status=(bus.live_status||"").toUpperCase();
+
+    let statusClass="status-offline";
+    if(status==="RUNNING") statusClass="status-running";
+    else if(status==="IDLE") statusClass="status-idle";
+
+    body.innerHTML+=`
+    <tr>
+        <td data-label="Bus">${bus.bus_number}</td>
+        <td data-label="Driver">${bus.driver_name||"-"}</td>
+        <td data-label="Status">
+            <span class="status-pill ${statusClass}">
+                ${status}
+            </span>
+        </td>
+        <td data-label="Last Update">${bus.last_updated||"-"}</td>
+        <td data-label="Map">
+            ${bus.latitude
+              ? `<a class="map-link" target="_blank" href="/org/bus-live-map/${bus.bus_id}">Live Map</a>`
+              : "-"}
+        </td>
+    </tr>`;
+});
+
+    });
+}
+loadLiveBusStatus();
+setInterval(loadLiveBusStatus,10000);
+</script>
+
+</body>
+</html>

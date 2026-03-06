@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Driver History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f6f9;
+}
+.container{
+    max-width:1100px;
+    margin:30px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.1);
+}
+h2{
+    margin-bottom:20px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+th,td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+    text-align:left;
+}
+th{
+    background:#f1f3f5;
+}
+.pickup{
+    color:#198754;
+    font-weight:bold;
+}
+.drop{
+    color:#0d6efd;
+    font-weight:bold;
+}
+.time{
+    font-size:13px;
+    color:#374151;
+}
+.back-btn{
+    margin-bottom:15px;
+    display:inline-block;
+    text-decoration:none;
+    background:#111827;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:6px;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<a href="/driver/dashboard" class="back-btn">← Back to Dashboard</a>
+
+<h2>📜 Pickup / Drop History</h2>
+
+<table>
+<thead>
+<tr>
+    <th>#</th>
+    <th>Date & Time</th>
+    <th>Student</th>
+    <th>Roll No</th>
+    <th>Stop</th>
+    <th>Action</th>
+</tr>
+</thead>
+<tbody>
+
+{% if logs %}
+    {% for l in logs %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td class="time">
+            {{ l.event_time.strftime("%d %b %Y, %I:%M %p") }}
+        </td>
+        <td>{{ l.student_name }}</td>
+        <td>{{ l.roll_no }}</td>
+        <td>{{ l.stop_name or '-' }}</td>
+        <td class="{{ 'pickup' if l.event_type=='pickup' else 'drop' }}">
+            {{ '🟢 Pickup' if l.event_type=='pickup' else '🔵 Drop' }}
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr>
+        <td colspan="6" style="text-align:center;color:#6b7280">
+            No history available
+        </td>
+    </tr>
+{% endif %}
+
+</tbody>
+</table>
+
+</div>
+
+</body>
+</html>

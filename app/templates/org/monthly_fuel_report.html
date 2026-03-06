@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Monthly Fuel Cost Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+    --primary:#1f2937;
+    --accent:#2563eb;
+    --danger:#dc2626;
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --border:#e5e7eb;
+}
+
+*{
+    box-sizing:border-box;
+    font-family:"Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:#111827;
+}
+
+.container{
+    max-width:1100px;
+    margin:30px auto;
+    background:var(--card);
+    padding:24px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+}
+
+/* HEADER */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.header h2{
+    margin:0;
+    font-size:22px;
+    font-weight:600;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+}
+
+.btn{
+    padding:8px 14px;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border:none;
+    cursor:pointer;
+}
+
+.btn-back{ background:#e5e7eb; color:#111827; }
+.btn-back:hover{ background:#d1d5db; }
+
+.btn-primary{ background:var(--accent); color:#fff; }
+.btn-primary:hover{ background:#1d4ed8; }
+
+.btn-danger{ background:var(--danger); color:#fff; }
+.btn-danger:hover{ background:#b91c1c; }
+
+/* FILTER */
+.filter-bar{
+    display:flex;
+    gap:12px;
+    align-items:flex-end;
+    margin-bottom:20px;
+}
+
+.filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.filter-group label{
+    font-size:12px;
+    color:#6b7280;
+}
+
+.filter-group input{
+    padding:6px 10px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    width:120px;
+}
+
+/* CHART */
+.chart-card{
+    background:#f9fafb;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:25px;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead th{
+    background:var(--primary);
+    color:#fff;
+    padding:12px;
+    font-size:14px;
+    text-align:left;
+}
+
+tbody td{
+    padding:12px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+tbody tr:hover{
+    background:#f9fafb;
+}
+
+/* BADGES */
+.badge{
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    color:#fff;
+}
+
+.DIESEL{ background:#16a34a; }
+.PETROL{ background:#dc2626; }
+.CNG{ background:#0891b2; }
+
+.amount{ font-weight:700; }
+
+.empty{
+    text-align:center;
+    padding:30px;
+    color:#6b7280;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>📊 Monthly Fuel Cost Report</h2>
+        <div class="actions">
+            <a href="/org/buses" class="btn btn-back">⬅ Back</a>
+            <a href="/org/reports/fuel-monthly/pdf?month={{ month }}&year={{ year }}"
+               class="btn btn-danger">⬇ Download PDF</a>
+        </div>
+    </div>
+
+    <!-- FILTER -->
+    <form method="get" class="filter-bar">
+        <div class="filter-group">
+            <label>Month</label>
+            <input type="number" name="month" min="1" max="12" value="{{ month }}">
+        </div>
+        <div class="filter-group">
+            <label>Year</label>
+            <input type="number" name="year" value="{{ year }}">
+        </div>
+        <button type="submit" class="btn btn-primary">View</button>
+    </form>
+
+    <!-- CHART -->
+    <div class="chart-card">
+        <canvas id="fuelCostChart" height="90"></canvas>
+    </div>
+
+    <!-- TABLE -->
+    <table>
+        <thead>
+            <tr>
+                <th>Bus</th>
+                <th>Fuel</th>
+                <th>Total KM</th>
+                <th>Fuel Used (L)</th>
+                <th>Total Cost (₹)</th>
+                <th>Trips</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in reports %}
+            <tr>
+                <td><strong>{{ r.bus_number }}</strong></td>
+                <td><span class="badge {{ r.fuel_type }}">{{ r.fuel_type }}</span></td>
+                <td>{{ r.total_distance_km }} km</td>
+                <td>{{ r.total_fuel_used }}</td>
+                <td class="amount">₹ {{ r.total_fuel_cost }}</td>
+                <td>{{ r.total_trips }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="empty">No fuel data available</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+const labels = [{% for r in reports %}"{{ r.bus_number }}",{% endfor %}];
+const data = [{% for r in reports %}{{ r.total_fuel_cost or 0 }},{% endfor %}];
+
+new Chart(document.getElementById('fuelCostChart'), {
+    type:'bar',
+    data:{
+        labels:labels,
+        datasets:[{
+            label:'Fuel Cost (₹)',
+            data:data,
+            backgroundColor:'#2563eb',
+            borderRadius:6,
+            barThickness:40
+        }]
+    },
+    options:{
+        plugins:{ legend:{display:false} },
+        scales:{
+            y:{ beginAtZero:true, ticks:{ callback:v=>'₹ '+v } }
+        }
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bus Stop Fee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+        .top-bar {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            padding: 8px 14px;
+            font-size: 14px;
+            text-decoration: none;
+            border-radius: 5px;
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .card {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            font-size: 14px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #212529;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.4px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .fee {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+
+        .no-fee {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .fee-input {
+            width: 120px;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .save-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: none;
+            background: #0d6efd;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .save-btn:hover {
+            background-color: #0b5ed7;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="top-bar">
+        <a href="/org/students" class="back-btn">← Dashboard</a>
+    </div>
+
+    <h2>Bus Stop Fee</h2>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Stop Name</th>
+                    <th>Monthly Fee (₹)</th>
+                    <th>Edit Fee</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for s in stops %}
+                <tr>
+                    <td>{{ s.stop_name }}</td>
+
+                    <td>
+                        {% if s.monthly_fee > 0 %}
+                            <span class="fee">₹ {{ s.monthly_fee }}</span>
+                        {% else %}
+                            <span class="no-fee">Not Set</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <form method="POST"
+                              action="/org/stop-fees/update"
+                              onsubmit="return validateFee(this)"
+                              style="display:flex; gap:8px; align-items:center;">
+
+                            <input type="hidden" name="stop_id" value="{{ s.id }}">
+
+                            <!-- ✅ TEXT INPUT (NO SPINNER) -->
+                            <input type="text"
+                            name="monthly_fee"
+                            value="{{ s.monthly_fee if s.monthly_fee > 0 else '' }}"
+                            placeholder="Enter fee"
+                            inputmode="decimal"
+                            pattern="^[0-9]+(\.[0-9]{1,2})?$"
+                            required
+                            class="fee-input">
+
+
+                            <button type="submit" class="save-btn">
+                                ✏️ Save
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+function validateFee(form) {
+    const fee = form.monthly_fee.value.trim();
+
+    if (fee === "" || isNaN(fee) || Number(fee) <= 0) {
+        alert("Please enter a valid monthly fee greater than 0");
+        return false;
+    }
+    return true;
+}
+</script>
+
+</body>
+</html>

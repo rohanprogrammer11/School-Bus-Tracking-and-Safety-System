@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parent Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1e40af;
+    --danger:#dc2626;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --bg:#f4f6f9;
+    --card:#ffffff;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont;
+    background:var(--bg);
+    color:var(--text);
+    padding:20px;
+}
+
+/* ---------- LAYOUT ---------- */
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+/* ---------- CARD ---------- */
+.card{
+    background:var(--card);
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+/* ---------- PROFILE HEADER ---------- */
+.profile-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.profile-info h2{
+    margin:0 0 6px;
+    font-size:22px;
+}
+
+.profile-info p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ---------- ACTIONS ---------- */
+.actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--primary);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:12px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s ease;
+}
+.btn:hover{
+    background:var(--primary-dark);
+}
+
+.btn.secondary{
+    background:#e5e7eb;
+    color:#111827;
+}
+.btn.secondary:hover{
+    background:#d1d5db;
+}
+
+/* ---------- CHILDREN ---------- */
+.section-title{
+    font-size:18px;
+    margin-bottom:16px;
+}
+
+.child{
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+    transition:.2s ease;
+}
+.child:hover{
+    box-shadow:0 8px 18px rgba(0,0,0,.06);
+}
+
+/* ---------- CHILD HEADER ---------- */
+.child h4{
+    margin:0 0 12px;
+    font-size:16px;
+    color:#111827;
+}
+
+/* ---------- ROWS ---------- */
+.row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:12px;
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+.row strong{
+    color:#374151;
+}
+
+/* ---------- STATUS ---------- */
+.status{
+    display:inline-block;
+    background:#fee2e2;
+    color:var(--danger);
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* ---------- EMPTY ---------- */
+.empty{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width:600px){
+    body{ padding:14px; }
+    .card{ padding:18px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ================= PROFILE ================= -->
+    <div class="card profile-header">
+        <div class="profile-info">
+            <h2>{{ parent.name or "Parent" }}</h2>
+            <p>{{ parent.email }}{% if parent.phone %} · {{ parent.phone }}{% endif %}</p>
+        </div>
+
+        <div class="actions">
+            <a href="/parent/dashboard" class="btn secondary">📊 Dashboard</a>
+        </div>
+    </div>
+
+    <!-- ================= CHILDREN ================= -->
+    <div class="card">
+        <h3 class="section-title">👨‍👩‍👧 My Children</h3>
+
+        {% if students %}
+            {% for s in students %}
+            <div class="child">
+                <h4>{{ s.student_name }}</h4>
+
+                <div class="row">
+                    <div><strong>Class:</strong> {{ s.std }} {{ s.division }}</div>
+                    <div><strong>Roll No:</strong> {{ s.roll_no }}</div>
+                </div>
+
+                <div class="row">
+                    <div><strong>Bus:</strong> {{ s.bus_number or "Not Assigned" }}</div>
+                    <div><strong>Route:</strong> {{ s.route_name or "-" }}</div>
+                    <div><strong>Stop:</strong> {{ s.stop_name or "-" }}</div>
+                </div>
+
+                <div class="row">
+                    <div><strong>Status:</strong> <span class="status">Not Recorded</span></div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty">No students linked to this account.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+</body>
+</html>

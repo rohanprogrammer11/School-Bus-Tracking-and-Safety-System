@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parent Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ================= BRAND THEME ================= */
+:root{
+    --brand-primary:#2563eb;     /* School main color */
+    --brand-secondary:#22c55e;   /* Call / success */
+    --brand-soft:#eff6ff;        /* Light blue background */
+
+    --text-main:#1f2937;
+    --text-muted:#6b7280;
+
+    --bg-page:#f8fafc;
+    --bg-card:#ffffff;
+
+    --border-light:#e5e7eb;
+    --shadow-soft:0 8px 22px rgba(0,0,0,0.06);
+}
+
+/* ================= RESET ================= */
+*{
+    box-sizing:border-box;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg-page);
+    color:var(--text-main);
+}
+
+/* ================= HEADER ================= */
+header{
+    background:#ffffff;
+    border-bottom:1px solid var(--border-light);
+    padding:14px 18px;
+}
+
+header h2{
+    margin:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:18px;
+    font-weight:600;
+    color:var(--brand-primary);
+}
+
+.nav-links{
+    display:flex;
+    gap:18px;
+}
+
+.nav-links a{
+    color:var(--text-muted);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:500;
+}
+
+.nav-links a:hover{
+    color:var(--brand-primary);
+}
+
+/* ================= LAYOUT ================= */
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:18px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+}
+
+/* ================= CARD ================= */
+.card{
+    background:var(--bg-card);
+    border-radius:16px;
+    padding:18px;
+    box-shadow:var(--shadow-soft);
+    position:relative;
+}
+
+/* ================= STATUS ================= */
+.badge{
+    position:absolute;
+    top:16px;
+    right:16px;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    color:#fff;
+}
+
+.picked{background:var(--brand-secondary);}
+.dropped{background:var(--brand-primary);}
+.absent{background:#ef4444;}
+
+/* ================= SECTIONS ================= */
+.section{
+    margin-bottom:14px;
+}
+
+.section-title{
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-bottom:6px;
+    text-transform:uppercase;
+}
+
+/* ================= ROW ================= */
+.row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    margin:6px 0;
+}
+
+/* ================= BUTTONS ================= */
+.btn{
+    background:var(--brand-secondary);
+    color:#fff;
+    padding:7px 16px;
+    border-radius:10px;
+    font-size:13px;
+    text-decoration:none;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.btn.secondary{
+    background:var(--brand-primary);
+}
+
+.btn:hover{
+    opacity:.9;
+}
+
+/* ================= DIVIDER ================= */
+.divider{
+    height:1px;
+    background:var(--border-light);
+    margin:14px 0;
+}
+
+/* ================= STUDENT ================= */
+.student-name{
+    font-size:17px;
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+.info p{
+    margin:4px 0;
+    font-size:14px;
+    color:#374151;
+}
+
+/* ================= MAP ================= */
+.map-btn{
+    display:block;
+    margin-top:14px;
+    background:var(--brand-soft);
+    color:var(--brand-primary);
+    padding:10px;
+    border-radius:12px;
+    text-align:center;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    border:1px solid var(--border-light);
+}
+
+/* ================= DETAILS ================= */
+details{
+    margin-top:14px;
+    background:#f9fafb;
+    padding:12px;
+    border-radius:12px;
+}
+
+summary{
+    cursor:pointer;
+    font-weight:600;
+    font-size:14px;
+}
+
+/* ================= TABLE ================= */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:13px;
+}
+
+th,td{
+    padding:8px;
+    border-bottom:1px solid var(--border-light);
+    text-align:center;
+}
+
+th{
+    color:var(--text-muted);
+    font-weight:600;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:600px){
+    header h2{font-size:16px}
+    .row{flex-direction:column;align-items:flex-start}
+    .btn,.map-btn{width:100%;text-align:center}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>
+    👨‍👩‍👧 Parent Dashboard
+    <div class="nav-links">
+        <a href="/parent/notifications">🔔 Notifications <span id="notifBadge"></span></a>
+        <a href="/parent/profile">👤 Profile</a>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+</h2>
+</header>
+
+<div class="container">
+
+{% if students %}
+<div class="cards">
+{% for s in students %}
+{% set attendance = attendance_map.get(s.id) %}
+{% set history = attendance_history_map.get(s.id, []) %}
+{% set bus_location = location_map.get(s.bus_id) %}
+{% set driver = driver_map.get(s.bus_id) %}
+
+<div class="card">
+
+{% if attendance %}
+    {% if attendance.status == 'PICKED' %}
+        <span class="badge picked">Picked</span>
+    {% elif attendance.status == 'DROPPED' %}
+        <span class="badge dropped">Dropped</span>
+    {% else %}
+        <span class="badge absent">Absent</span>
+    {% endif %}
+{% else %}
+    <span class="badge absent">No Record</span>
+{% endif %}
+
+<!-- SCHOOL FIRST -->
+<div class="section">
+    <div class="section-title">School</div>
+    <div class="row"><span>{{ org_name }}</span></div>
+    <div class="row">
+        <span>{{ org_phone }}</span>
+        <a class="btn secondary" href="tel:{{ org_phone }}">Call School</a>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DRIVER -->
+<div class="section">
+    <div class="section-title">Driver</div>
+    {% if driver %}
+        <div class="row"><span>{{ driver.name }} ({{ driver.code }})</span></div>
+        <div class="row">
+            <span>{{ driver.phone }}</span>
+            <a class="btn" href="tel:{{ driver.phone }}">Call Driver</a>
+        </div>
+    {% else %}
+        <div class="row"><span>Not assigned</span></div>
+    {% endif %}
+</div>
+
+<div class="divider"></div>
+
+<div class="student-name">👦 {{ s.name }}</div>
+
+<div class="info">
+    <p><strong>Roll:</strong> {{ s.roll_no }}</p>
+    <p><strong>Bus:</strong> {{ s.bus_number or "Not Assigned" }}</p>
+    <p><strong>Route:</strong> {{ s.route_name or "Not Assigned" }}</p>
+    <p><strong>Stop:</strong> {{ s.stop_name or "Not Assigned" }}</p>
+
+    {% if attendance %}
+        <p><strong>Pickup:</strong> {{ attendance.pickup_time or "-" }}</p>
+        <p><strong>Drop:</strong> {{ attendance.drop_time or "-" }}</p>
+    {% endif %}
+</div>
+
+{% if bus_location and s.bus_id %}
+<a class="map-btn" target="_blank" href="/parent/live-map/{{ s.bus_id }}">
+📍 Track Live Bus
+</a>
+{% endif %}
+
+<details>
+<summary>View Full Details & Attendance</summary>
+{% if history %}
+<table>
+<tr><th>Date</th><th>Status</th><th>Pickup</th><th>Drop</th></tr>
+{% for h in history %}
+<tr>
+<td>{{ h.date }}</td>
+<td>{{ h.status }}</td>
+<td>{{ h.pickup_time or "-" }}</td>
+<td>{{ h.drop_time or "-" }}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No attendance history available.</p>
+{% endif %}
+</details>
+
+</div>
+{% endfor %}
+</div>
+{% else %}
+<p>No students assigned to your account.</p>
+{% endif %}
+
+</div>
+
+<script>
+function loadParentNotificationCount(){
+    fetch("/parent/notifications/unread-count",{credentials:"same-origin"})
+    .then(r=>r.json())
+    .then(d=>{
+        const b=document.getElementById("notifBadge");
+        b.textContent=d.count>0?`(${d.count})`:"";
+    });
+}
+loadParentNotificationCount();
+setInterval(loadParentNotificationCount,15000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Student</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+        }
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        input[readonly] {
+            background-color: #f1f3f5;
+            font-weight: 600;
+        }
+        button {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .fee-title {
+            margin-top: 20px;
+            font-weight: 600;
+            color: #212529;
+        }
+        .fee-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .paid { color: #198754; }
+        .due { color: #dc3545; }
+        .divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 20px 0;
+        }
+
+        .alert {
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <a href="/org/students">← Back</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+    <h2>Edit Student</h2>
+
+    <div class="card">
+
+        <!-- ================= STUDENT UPDATE FORM ================= -->
+        <form method="POST">
+
+            <input name="name" value="{{ student.name }}" required>
+            <input name="roll_no" value="{{ student.roll_no }}" required>
+
+            <input name="rfid_tag" placeholder="Student ID / RFID" value="{{ student.rfid_tag }}">
+            <input name="qr_code" placeholder="QR Code" value="{{ student.qr_code }}">
+
+            <select name="class_id">
+                {% for c in classes %}
+                <option value="{{ c.id }}" {% if c.id == student.class_id %}selected{% endif %}>
+                    {{ c.std }} {{ c.division }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select name="parent_id">
+                <option value="">Select Parent</option>
+                {% for p in parents %}
+                <option value="{{ p.id }}" {% if p.id == student.parent_id %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select name="bus_id" id="bus_id" data-selected-stop="{{ student.assigned_stop_id }}">
+                <option value="">Select Bus</option>
+                {% for b in buses %}
+                <option value="{{ b.id }}" {% if b.id == student.bus_id %}selected{% endif %}>
+                    {{ b.bus_number }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <input id="route_name" placeholder="Route Name" readonly>
+            <input id="assignment_type" placeholder="Pickup / Drop" readonly>
+            <input id="route_time" placeholder="Timing" readonly>
+            <input id="driverName" placeholder="Assigned Driver" readonly>
+
+            <select name="assigned_stop_id" id="assigned_stop_id">
+                <option value="">Pickup Stop</option>
+                {% for s in stops %}
+                <option value="{{ s.id }}" {% if s.id == student.assigned_stop_id %}selected{% endif %}>
+                    {{ s.stop_name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Update Student</button>
+        </form>
+
+        <div class="divider"></div>
+
+        <!-- ================= FEE SUMMARY ================= -->
+        <div class="fee-title">Bus Fee (Current Month)</div>
+
+        <div class="fee-grid">
+            <input type="text" value="₹ {{ student.total_fee or 0 }}" readonly>
+            <input type="text" value="₹ {{ student.amount_paid or 0 }}" readonly>
+
+            {% if student.remaining_fee > 0 %}
+                <input type="text" value="₹ {{ student.remaining_fee }} Due" readonly class="due">
+            {% else %}
+                <input type="text" value="Paid" readonly class="paid">
+            {% endif %}
+        </div>
+
+        <!-- ================= PAY FEE FORM ================= -->
+        <form method="POST"
+              action="/org/students/pay-fee/{{ student.id }}"
+              style="margin-top:15px; display:flex; gap:10px;">
+
+            <input type="number"
+                   name="pay_amount"
+                   placeholder="Pay Amount (₹)"
+                   min="1"
+                   required
+                   style="flex:1;">
+
+            <select name="payment_mode" style="flex:1;">
+                <option value="CASH">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="CARD">Card</option>
+                <option value="BANK">Bank</option>
+            </select>
+
+            <button type="submit">Pay</button>
+        </form>
+        <div class="divider"></div>
+
+<!-- ================= PAYMENT HISTORY ================= -->
+<div class="fee-title">Payment History (This Month)</div>
+
+<table width="100%" border="1" cellspacing="0" cellpadding="8">
+<tr style="background:#f1f3f5;">
+    <th>Date</th>
+    <th>Amount</th>
+    <th>Mode</th>
+    <th>Receipt</th>
+</tr>
+
+{% for p in payments %}
+<tr>
+    <td>{{ p.paid_on.strftime('%d-%m-%Y %I:%M %p') }}</td>
+    <td>₹ {{ p.paid_amount }}</td>
+    <td>{{ p.payment_mode }}</td>
+    <td>
+        <a href="/org/students/payment-receipt/{{ p.id }}">⬇ PDF</a>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="4" align="center">No payments yet</td>
+</tr>
+{% endfor %}
+</table>
+
+</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const bus = document.getElementById("bus_id");
+    const stopSelect = document.getElementById("assigned_stop_id");
+
+    function load(busId) {
+        if (!busId) return;
+
+        fetch(`/org/students/get-bus-details/${busId}`)
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById("route_name").value = d.route_name || "";
+            document.getElementById("assignment_type").value = d.assignment || "";
+            document.getElementById("route_time").value = d.time || "";
+            document.getElementById("driverName").value = d.driver_name || "";
+
+            stopSelect.innerHTML = `<option value="">Pickup Stop</option>`;
+            if (d.stops) {
+                d.stops.forEach(s => {
+                    const o = document.createElement("option");
+                    o.value = s.id;
+                    o.textContent = s.stop_name;
+                    if (s.id == bus.dataset.selectedStop) o.selected = true;
+                    stopSelect.appendChild(o);
+                });
+            }
+        });
+    }
+
+    if (bus.value) load(bus.value);
+    bus.addEventListener("change", e => load(e.target.value));
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const alerts = document.querySelectorAll(".alert");
+
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.classList.add("alert-hide");
+            setTimeout(() => alert.remove(), 500);
+        }, 1000); // ⏱ 5 seconds
+    });
+});
+</script>
+
+
+</body>
+</html>
