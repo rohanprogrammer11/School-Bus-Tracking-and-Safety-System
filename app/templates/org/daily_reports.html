@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Daily Transport Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1e40af;
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --success:#16a34a;
+}
+
+/* RESET */
+*{
+    box-sizing:border-box;
+    font-family:"Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* PAGE */
+.page{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 20px;
+}
+
+/* CARD */
+.card{
+    background:var(--card);
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.06);
+    padding:25px;
+    margin-bottom:25px;
+}
+
+/* HEADER */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.title h1{
+    margin:0;
+    font-size:24px;
+    color:var(--primary-dark);
+}
+
+/* FILTER BAR */
+.filter-bar{
+    margin-top:15px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+}
+
+.filter-bar input{
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    min-width:120px;
+}
+
+/* BUTTON */
+.btn{
+    background:var(--primary);
+    color:white;
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.2s;
+}
+
+.btn:hover{
+    background:var(--primary-dark);
+}
+
+/* SECOND BUTTON */
+.btn-light{
+    background:#eef2ff;
+    color:#1e40af;
+}
+
+.btn-light:hover{
+    background:#dbeafe;
+}
+
+/* BACK LINK */
+.back-link{
+    display:inline-block;
+    margin-top:15px;
+    font-weight:600;
+    color:var(--primary);
+    text-decoration:none;
+}
+
+/* TABLE */
+.table-wrap{
+    overflow:auto;
+    border-radius:12px;
+    border:1px solid var(--border);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead th{
+    background:#f1f5ff;
+    padding:14px;
+    text-align:left;
+    font-size:14px;
+}
+
+tbody td{
+    padding:14px;
+    border-top:1px solid var(--border);
+}
+
+tbody tr:hover{
+    background:#f9fafb;
+}
+
+/* BADGE */
+.badge{
+    background:#dcfce7;
+    color:var(--success);
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* SECTION TITLE */
+.section-title{
+    font-size:18px;
+    margin-bottom:15px;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    .header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+
+
+/* HEADER TOP */
+.header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+/* TITLE */
+.title h2{
+    margin:0;
+    font-size:24px;
+    color:#1e40af;
+}
+
+.subtitle{
+    margin:4px 0 0;
+    font-size:13px;
+    color:#6b7280;
+}
+
+/* DATE FILTER */
+.date-filter{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.date-filter label{
+    font-weight:600;
+    font-size:14px;
+}
+
+.date-filter input{
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #e5e7eb;
+}
+
+/* FILTER BAR */
+.filter-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    padding:15px;
+    background:#f8fafc;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+    margin-bottom:15px;
+}
+
+/* INPUT */
+.input{
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #e5e7eb;
+    min-width:140px;
+    font-size:14px;
+}
+
+.input.small{
+    min-width:100px;
+}
+
+/* BUTTON */
+.btn{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn:hover{
+    background:#1e40af;
+}
+
+/* SECOND BUTTON */
+.btn-light{
+    background:#eef2ff;
+    color:#1e40af;
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.btn-light:hover{
+    background:#dbeafe;
+}
+
+/* BACK LINK */
+.back-link{
+    display:inline-block;
+    margin-top:8px;
+    font-weight:600;
+    color:#2563eb;
+    text-decoration:none;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+    .header-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .date-filter{
+        width:100%;
+        justify-content:space-between;
+    }
+
+    .filter-bar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+}
+
+/* FOOTER */
+.footer{
+    margin-top:40px;
+    padding:20px 10px;
+    text-align:center;
+    background:transparent;
+}
+
+.footer-content{
+    border-top:1px solid #e5e7eb;
+    padding-top:15px;
+}
+
+.footer-content p{
+    margin:0;
+    font-size:14px;
+    color:#374151;
+    font-weight:500;
+}
+
+.footer-sub{
+    display:block;
+    margin-top:5px;
+    font-size:12px;
+    color:#6b7280;
+}
+
+/* OPTIONAL STICKY FOOTER */
+body{
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+.page{
+    flex:1;
+}
+</style>
+</head>
+
+<body>
+<script>
+
+setInterval(() => {
+    window.location.reload();
+}, 5000); // refresh every 5 seconds
+</script>
+
+<script>
+setInterval(async () => {
+    const res = await fetch("/org/api/daily-report");
+    const data = await res.json();
+
+    console.log("Updated:", data);
+
+    // You can update table dynamically here
+}, 5000);
+</script>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<div class="page">
+
+    <!-- HEADER -->
+    <div class="card">
+
+        <!-- TOP BAR -->
+        <div class="header-top">
+            <div class="title">
+                <h2>📊 Daily Transport Report</h2>
+                <p class="subtitle">Monitor daily bus activity, fuel usage & trips</p>
+            </div>
+
+            <form method="get" class="date-filter">
+                <label>Date</label>
+                <input type="date" name="date" value="{{ report_date }}">
+                <button type="submit" class="btn">View</button>
+            </form>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+
+            <input type="month" id="monthPicker" class="input" placeholder="Month">
+
+            <input type="number" id="yearPicker" class="input small" placeholder="Year">
+
+            <input type="number" id="busId" class="input small" placeholder="Bus ID">
+
+            <input type="number" id="driverId" class="input small" placeholder="Driver ID">
+
+            <button class="btn" onclick="downloadPDF('month')">📅 Monthly</button>
+            <button class="btn-light" onclick="downloadPDF('year')">📆 Yearly</button>
+
+        </div>
+
+        <a href="/org/dashboard" class="back-link">⬅ Back to Dashboard</a>
+
+    </div>
+
+    <!-- BUS REPORT -->
+    <div class="card collapsible">
+        <div class="collapsible-header" onclick="toggleSection(this)">
+            <h3>🚌 Bus Daily Report</h3>
+            <span class="arrow">▾</span>
+        </div>
+
+        <div class="collapsible-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bus</th>
+                            <th>Driver</th>
+                            <th>Route</th>
+                            <th>KM</th>
+                            <th>Fuel Used</th>
+                            <th>Fuel Cost</th>
+                            <th>Trips</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in bus_reports %}
+                        <tr>
+                            <td>{{ r.bus_number }}</td>
+                            <td>{{ r.driver_name }}</td>
+                            <td>{{ r.route_name }}</td>
+                            <td><strong>{{ r.total_distance_km }}</strong> km</td>
+                            <td>{{ "%.2f"|format(r.fuel_used or 0) }} L</td>
+                            <td>₹ {{ "%.2f"|format(r.fuel_cost or 0) }}</td>
+                            <td><span class="badge">{{ r.total_trips }}</span></td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" class="no-data">No data available</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- DRIVER REPORT -->
+    <div class="card collapsible collapsed">
+        <div class="collapsible-header" onclick="toggleSection(this)">
+            <h3>👨‍✈️ Driver Daily Report</h3>
+            <span class="arrow">▾</span>
+        </div>
+
+        <div class="collapsible-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Driver</th>
+                            <th>Bus</th>
+                            <th>Route</th>
+                            <th>KM Driven</th>
+                            <th>Trips</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in driver_reports %}
+                        <tr>
+                            <td>{{ r.driver_name }}</td>
+                            <td>{{ r.bus_number }}</td>
+                            <td>{{ r.route_name }}</td>
+                            <td>{{ r.total_distance_km }} km</td>
+                            <td><span class="badge">{{ r.total_trips }}</span></td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5" class="no-data">No data available</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<footer class="footer">
+    <div class="footer-content">
+        <p>© 2026 School Bus Safety & Transport Monitoring System</p>
+        <span class="footer-sub">Secure • Smart • Real-time Tracking</span>
+    </div>
+</footer>
+</div>
+
+<script>
+    // Collapsible logic
+    function toggleSection(header){
+        header.parentElement.classList.toggle("collapsed");
+    }
+
+    // Scroll progress bar
+    window.addEventListener("scroll", ()=>{
+        const doc = document.documentElement;
+        const scrolled = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+        document.getElementById("scrollProgress").style.width = scrolled + "%";
+    });
+</script>
+<script>
+function downloadPDF(type){
+
+    const month = document.getElementById("monthPicker").value;
+    const year = document.getElementById("yearPicker").value;
+    const bus = document.getElementById("busId").value;
+    const driver = document.getElementById("driverId").value;
+
+    let url = `/org/download-report?type=${type}`;
+
+    if(type === "month" && month){
+        url += `&month=${month}`;
+    }
+
+    if(type === "year" && year){
+        url += `&year=${year}`;
+    }
+
+    if(bus){
+        url += `&bus_id=${bus}`;
+    }
+
+    if(driver){
+        url += `&driver_id=${driver}`;
+    }
+
+    window.open(url, "_blank");
+}
+</script>
+</body>
+</html>

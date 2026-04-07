@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Pickup & Drop History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --border:#e5e7eb;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --picked:#16a34a;
+    --dropped:#2563eb;
+    --absent:#dc2626;
+}
+
+*{
+    box-sizing:border-box;
+    font-family:Inter,system-ui,sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* HEADER */
+header{
+    background:#ffffff;
+    border-bottom:1px solid var(--border);
+    padding:14px 18px;
+}
+
+header h2{
+    margin:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:18px;
+}
+
+header a{
+    text-decoration:none;
+    color:var(--primary);
+    font-weight:600;
+}
+
+/* LAYOUT */
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:18px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    padding:16px;
+}
+
+/* FILTER BAR */
+.filter-bar{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.filter-bar select{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+}
+
+.filter-bar button{
+    padding:10px 18px;
+    border-radius:8px;
+    border:none;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.btn-filter{
+    background:var(--primary);
+    color:#fff;
+}
+
+.btn-pdf{
+    background:#16a34a;
+    color:#fff;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid var(--border);
+    text-align:center;
+}
+
+th{
+    font-size:12px;
+    color:var(--muted);
+    text-transform:uppercase;
+}
+
+.status{
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    color:#fff;
+}
+
+.PICKED{background:var(--picked)}
+.DROPPED{background:var(--dropped)}
+.ABSENT{background:var(--absent)}
+
+/* MOBILE */
+@media(max-width:768px){
+    table,thead,tbody,tr,th,td{
+        display:block;
+    }
+
+    tr{
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:10px;
+        margin-bottom:14px;
+        padding:10px;
+    }
+
+    th{display:none}
+
+    td{
+        text-align:left;
+        padding:6px 0;
+    }
+
+    td::before{
+        content:attr(data-label);
+        display:block;
+        font-size:12px;
+        font-weight:600;
+        color:var(--muted);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>
+    📜 Student Pickup & Drop History
+    <a href="/org/dashboard">⬅ Dashboard</a>
+</h2>
+</header>
+
+<div class="container">
+<div class="card">
+
+<!-- ================= FILTER + PDF ================= -->
+<div class="filter-bar">
+    <!-- Filter -->
+    <form method="get" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <select name="class_id">
+            <option value="">All Classes</option>
+            {% for c in classes %}
+                <option value="{{ c.id }}"
+                    {% if selected_class_id == c.id|string %}selected{% endif %}>
+                    {{ c.std }} {{ c.division }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn-filter">
+            Filter
+        </button>
+    </form>
+
+    <!-- PDF Download -->
+    <form method="get" action="/org/student-history/pdf">
+        {% if selected_class_id %}
+            <input type="hidden" name="class_id" value="{{ selected_class_id }}">
+        {% endif %}
+        <button type="submit" class="btn-pdf">
+            📄 Download PDF
+        </button>
+    </form>
+</div>
+
+<!-- ================= TABLE ================= -->
+<table>
+<thead>
+<tr>
+    <th>Date</th>
+    <th>Student</th>
+    <th>Roll</th>
+    <th>Class</th>
+    <th>Bus</th>
+    <th>Route</th>
+    <th>Stop</th>
+    <th>Status</th>
+    <th>Pickup</th>
+    <th>Drop</th>
+</tr>
+</thead>
+
+<tbody>
+{% for h in history %}
+<tr>
+    <td data-label="Date">{{ h.date }}</td>
+    <td data-label="Student">{{ h.student_name }}</td>
+    <td data-label="Roll">{{ h.roll_no }}</td>
+    <td data-label="Class">{{ h.class_category }}</td>
+    <td data-label="Bus">{{ h.bus_number or "-" }}</td>
+    <td data-label="Route">{{ h.route_name or "-" }}</td>
+    <td data-label="Stop">{{ h.stop_name or "-" }}</td>
+    <td data-label="Status">
+        <span class="status {{ h.status }}">{{ h.status }}</span>
+    </td>
+    <td data-label="Pickup">{{ h.pickup_time or "-" }}</td>
+    <td data-label="Drop">{{ h.drop_time or "-" }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+</div>
+</div>
+
+</body>
+</html>

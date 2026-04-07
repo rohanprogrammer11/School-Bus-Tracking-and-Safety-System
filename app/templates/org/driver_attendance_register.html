@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Attendance Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+    font-family:Segoe UI,Arial;
+    background:#f4f6f9;
+    padding:20px;
+}
+
+/* ---------- HEADER ---------- */
+.header{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.header h2{
+    margin:0;
+    font-size:24px;
+    font-weight:600;
+}
+
+.back-btn{
+    text-decoration:none;
+    background:#6c757d;
+    color:#fff;
+    padding:7px 12px;
+    border-radius:6px;
+    font-size:14px;
+}
+.back-btn:hover{background:#5a6268}
+
+/* ---------- LEGEND ---------- */
+.legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+.legend span{
+    font-weight:600;
+}
+
+/* ---------- STATUS COLORS ---------- */
+.P{background:#d1e7dd;color:#0f5132;font-weight:bold}
+.A{background:#f8d7da;color:#842029;font-weight:bold}
+.L{background:#fff3cd;color:#664d03;font-weight:bold}
+.H{background:#e2e3e5;color:#41464b;font-weight:bold}
+.OT{background:#cff4fc;color:#055160;font-weight:bold}
+
+/* ---------- TABLE WRAPPER (LAYOUT FIX) ---------- */
+.table-wrapper{
+    overflow-x:auto;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+/* ---------- TABLE ---------- */
+table{
+    width:max-content;
+    min-width:100%;
+    border-collapse:collapse;
+    background:#fff;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:6px;
+    text-align:center;
+    font-size:13px;
+    min-width:44px;
+}
+
+th{
+    background:#1f2933;
+    color:#fff;
+    position:sticky;
+    top:0;
+    z-index:3;
+    white-space:nowrap;
+}
+
+/* ---------- DRIVER COLUMN (STICKY) ---------- */
+.name-col{
+    text-align:left;
+    min-width:200px;
+    font-weight:600;
+    position:sticky;
+    left:0;
+    background:#fff;
+    z-index:2;
+}
+
+thead .name-col{
+    background:#1f2933;
+    z-index:4;
+}
+
+/* ---------- DROPDOWN ---------- */
+select.att-select{
+    width:40px;
+    height:26px;
+    font-size:12px;
+    padding:2px;
+    border-radius:4px;
+    border:1px solid #bbb;
+    background:#fff;
+    text-align:center;
+}
+
+/* ---------- SAVE BAR ---------- */
+.save-bar{
+    margin-top:15px;
+    display:flex;
+    justify-content:flex-start;
+}
+
+.OT {
+    background:#cff4fc;
+    color:#055160;
+    font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <a href="/org/driver-attendance" class="back-btn">⬅ Back</a>
+    <h2>📅 Driver Attendance Register – {{ month_name }} {{ year }}</h2>
+</div>
+
+<!-- MONTH FILTER -->
+<form method="GET">
+    <select name="month">
+        {% for m in range(1,13) %}
+        <option value="{{m}}" {% if m==month %}selected{% endif %}>{{m}}</option>
+        {% endfor %}
+    </select>
+
+    <select name="year">
+        {% for y in range(2024,2031) %}
+        <option value="{{y}}" {% if y==year %}selected{% endif %}>{{y}}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">View</button>
+</form>
+
+<br>
+
+<!-- LEGEND -->
+<div class="legend">
+    <span class="P">P = Present</span>
+    <span class="A">A = Absent</span>
+    <span class="L">L = Leave</span>
+    <span class="H">H = Holiday (Sunday)</span>
+    <span class="OT">OT = Overtime</span>
+</div>
+
+<br>
+
+<!-- EXPORT BUTTONS -->
+<div style="margin:15px 0; display:flex; gap:10px;">
+    <a href="/org/driver-attendance/register/excel?month={{ month }}&year={{ year }}"
+       style="background:#198754;color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:14px;">
+       📊 Excel
+    </a>
+
+    <a href="/org/driver-attendance/register/pdf?month={{ month }}&year={{ year }}"
+       style="background:#dc3545;color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:14px;">
+       📄 PDF
+    </a>
+</div>
+
+<br>
+
+<!-- EDITABLE REGISTER -->
+<form method="POST"
+      action="/org/driver-attendance/register/update?month={{ month }}&year={{ year }}">
+
+<div class="save-bar">
+    <button type="submit"
+        style="background:#0d6efd;color:#fff;padding:8px 18px;border:none;border-radius:6px;font-size:14px;cursor:pointer;">
+        💾 Save Changes
+    </button>
+</div>
+
+<br>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+    <th class="name-col">Driver</th>
+    {% for d in range(1, total_days+1) %}
+        <th>{{ d }}</th>
+    {% endfor %}
+    <th>P</th>
+    <th>A</th>
+    <th>L</th>
+    <th>OT</th>
+    <th>Salary</th>
+
+</tr>
+</thead>
+
+<tbody>
+{% for driver in register.values() %}
+<tr>
+    <td class="name-col">
+        {{ driver["name"] }} ({{ driver["code"] }})
+    </td>
+
+    {% for d in range(1, total_days+1) %}
+    <td class="{{ driver['days'][d] }}">
+        <select
+            name="attendance[{{ driver['code'] }}][{{ d }}]"
+            class="att-select {{ driver['days'][d] }}"
+        >
+            <option value="P" {% if driver['days'][d]=='P' %}selected{% endif %}>P</option>
+            <option value="A" {% if driver['days'][d]=='A' %}selected{% endif %}>A</option>
+            <option value="L" {% if driver['days'][d]=='L' %}selected{% endif %}>L</option>
+            <option value="H" {% if driver['days'][d]=='H' %}selected{% endif %}>H</option>
+            <option value="OT" {% if driver['days'][d]=='OT' %}selected{% endif %}>OT</option>
+        </select>
+    </td>
+    {% endfor %}
+
+    <td class="P">{{ driver["present"] }}</td>
+    <td class="A">{{ driver["absent"] }}</td>
+    <td class="L">{{ driver["leave"] }}</td>
+    <td class="OT">{{ driver["overtime"] }}</td>
+    <td><strong>₹{{ "{:,.2f}".format(driver["salary"]) }}</strong></td>
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+</div>
+
+
+</form>
+
+</body>
+</html>

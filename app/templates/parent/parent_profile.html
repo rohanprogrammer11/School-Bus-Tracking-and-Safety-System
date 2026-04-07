@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parent Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1e40af;
+    --danger:#dc2626;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --bg:#f4f6f9;
+    --card:#ffffff;
+}
+
+/* RESET */
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    font-family: "Segoe UI", system-ui;
+    background:var(--bg);
+    color:var(--text);
+    padding:24px;
+}
+
+/* CONTAINER */
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+/* CARD */
+.card{
+    background:var(--card);
+    border-radius:18px;
+    padding:26px;
+    margin-bottom:24px;
+    box-shadow:0 12px 35px rgba(0,0,0,0.08);
+    transition:0.2s ease;
+}
+
+/* PROFILE HEADER */
+.profile-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.profile-header h2{
+    margin:0;
+    font-size:24px;
+}
+
+.profile-header p{
+    margin-top:6px;
+    color:var(--muted);
+}
+
+/* BUTTONS */
+.btn{
+    background:var(--primary);
+    color:#fff;
+    padding:10px 20px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    text-decoration:none; 
+    font-weight:600;
+    transition:0.2s ease;
+    margin-right:10px;
+}
+
+.btn:hover{
+    background:var(--primary-dark);
+}
+
+.btn.secondary{
+    background:#e5e7eb;
+    color:#111827;
+}
+
+.btn.secondary:hover{
+    background:#d1d5db;
+}
+
+/* SECTION TITLE */
+h3{
+    margin-bottom:18px;
+}
+
+/* CHILD CARD */
+.child{
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:18px;
+    margin-bottom:16px;
+    transition:0.2s ease;
+}
+
+.child:hover{
+    box-shadow:0 8px 20px rgba(0,0,0,0.06);
+}
+
+/* CHILD NAME */
+.child h4{
+    margin:0 0 12px;
+    font-size:17px;
+    color:#111827;
+}
+
+/* ROW GRID */
+.row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:12px;
+    margin-bottom:6px;
+    font-size:14px;
+}
+
+/* STATUS */
+.status{
+    background:#fee2e2;
+    color:var(--danger);
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* MOBILE */
+@media (max-width:600px){
+    body{ padding:16px; }
+    .card{ padding:18px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card profile-header">
+    <div>
+        <h2>{{ parent.name or "Parent" }}</h2>
+        <p>{{ parent.email }}</p>
+    </div>
+
+    <div>
+        <a href="/parent/dashboard" class="btn secondary">Dashboard</a>
+        <a href="/parent/assign-page" class="btn">➕ Assign Student</a>
+    </div>
+</div>
+
+<div class="card">
+<h3>My Children</h3>
+
+{% for s in students %}
+<div class="child">
+    <h4>{{ s.student_name }}</h4>
+
+    <div class="row">
+        <div>Class: {{ s.std }} {{ s.division }}</div>
+        <div>Roll: {{ s.roll_no }}</div>
+    </div>
+
+    <div class="row">
+        <div>Bus: {{ s.bus_number }}</div>
+        <div>Route: {{ s.route_name }}</div>
+        <div>Stop: {{ s.stop_name }}</div>
+    </div>
+
+    <div class="row">
+        <div>Status: <span class="status">Not Recorded</span></div>
+    </div>
+</div>
+{% endfor %}
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<script>
+function openAssignModal(){
+    document.getElementById("assignModal").style.display = "block";
+}
+
+function closeAssignModal(){
+    document.getElementById("assignModal").style.display = "none";
+}
+
+// ✅ NEW FUNCTION
+function findStudent(){
+    let value = document.getElementById("searchValue").value;
+
+    fetch("/parent/find-student", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({value:value})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.status !== "success"){
+            alert(data.message);
+            return;
+        }
+
+        document.getElementById("studentDetails").style.display="block";
+        document.getElementById("student_id").value = data.student.id;
+        document.getElementById("s_name").innerText = data.student.name;
+        document.getElementById("s_roll").innerText = data.student.roll_no;
+        document.getElementById("s_class").innerText =
+            data.student.std + " " + data.student.division;
+        document.getElementById("s_rfid").innerText = data.student.rfid_tag;
+        document.getElementById("s_qr").innerText = data.student.qr_code;
+    });
+}
+
+// EXISTING LOGIC KEPT
+document.getElementById("assignForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("/parent/assign-student", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+
+        if(data.status === "success"){
+            location.reload();
+        }
+    });
+});
+</script>
+
+</body>
+</html>

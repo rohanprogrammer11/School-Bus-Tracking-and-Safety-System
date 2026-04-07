@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1d3557, #457b9d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            padding: 30px 25px;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #1d3557;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #457b9d;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 6px;
+            background: #1d3557;
+            color: #ffffff;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #16324f;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .footer-links a {
+            color: #457b9d;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            background: #fdecea;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+                        /* PASSWORD TOGGLE */
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 10px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 55%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .field-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: -10px;
+            margin-bottom: 12px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>👨‍👩‍👧 Parent Login</h2>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="error">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+<form method="POST" action="/parent/login">
+    <div class="form-group">
+        <label>Email or Phone</label>
+        <input
+            type="text"
+            name="identifier"
+            placeholder="Enter email or phone"
+            required
+        >
+    </div>
+
+<div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                
+                 <img
+                    src="{{ url_for('static', filename='images/eye-closed.png') }}"
+                    id="toggleIcon"
+                    class="toggle-password"
+                    onclick="togglePassword()"
+                    alt="Toggle Password"
+                >
+    
+            </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+
+    <button class="btn" type="submit">
+        Login
+    </button>
+</form>
+
+    <div class="footer-links">
+        <p>
+            Don’t have an account?
+            <a href="/parent/register">Register here</a>
+        </p>
+        <p style="text-align:center; margin-top:10px;">
+            <a href="{{ url_for('parent.parent_forgot_password') }}">
+                Forgot Password?
+            </a>
+        </p>
+
+        <p>
+            <a href="/">← Back to Home</a>
+        </p>
+    </div>
+</div>
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.src = "{{ url_for('static', filename='images/eye-open.png') }}";
+    } else {
+        passwordInput.type = "password";
+        icon.src = "{{ url_for('static', filename='images/eye-closed.png') }}";
+    }
+}
+</script>
+
+
+</body>
+</html>

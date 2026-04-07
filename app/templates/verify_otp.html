@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email OTP Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #212529;
+        }
+
+        p {
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #212529;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .footer-text a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        .countdown {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #dc3545;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .success {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>📧 {{ user_type }} Email Verification</h2>
+        <p>Enter the 6-digit OTP sent to your registered email</p>
+
+        <form method="POST">
+
+            <label for="otp">OTP Code</label>
+            <input
+                type="text"
+                id="otp"
+                name="otp"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                placeholder="------"
+                required
+            >
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert {{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <button type="submit" class="btn">Verify OTP</button>
+
+        </form>
+
+        <div class="countdown">
+            OTP expires in <span id="timer">05:00</span>
+        </div>
+
+        <div class="footer-text">
+            Didn't receive OTP?
+            <a href="{{ resend_url }}">Resend OTP</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Countdown Timer (5 Minutes)
+    let time = 300;
+
+    const timerElement = document.getElementById("timer");
+
+    const countdown = setInterval(() => {
+        let minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        timerElement.textContent = minutes + ":" + seconds;
+
+        if (time <= 0) {
+            clearInterval(countdown);
+            timerElement.textContent = "Expired";
+        }
+
+        time--;
+    }, 1000);
+
+    // Only allow numbers
+    document.getElementById("otp").addEventListener("input", function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+</script>
+
+</body>
+</html>

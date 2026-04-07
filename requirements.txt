@@ -1,0 +1,7 @@
+Flask
+Flask-Mail
+gunicorn
+mysql-connector-python
+werkzeug
+openpyxl
+reportlab

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organization Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #212529;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 95%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .footer-text a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* PASSWORD TOGGLE */
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 10px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .alert.success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        textarea {
+            width: 94%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        .field-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: -10px;
+            margin-bottom: 12px;
+        }
+
+        input.error-input,
+        textarea.error-input {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+
+    </style>
+</head>
+
+<body>
+
+
+<div class="register-container">
+    <div class="card">
+        <h2>🏫 Organization Registration</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert {{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/signup" method="POST">
+
+            <!-- ORGANIZATION NAME -->
+            <label for="org_name">Organization Name</label>
+            <input
+                type="text"
+                id="org_name"
+                name="org_name"
+                value="{{ form_data.org_name if form_data else '' }}"
+                placeholder="Enter organization name"
+                required
+            >
+
+            <!-- ✅ UDISE CODE (VALIDATED, SAME DESIGN) -->
+            <label for="udise_code">UDISE Code</label>
+            <input type="text" id="udise_code" name="udise_code"
+            value="{{ form_data.udise_code if form_data else '' }}">
+
+            {% if errors and errors.get('udise_code') %}
+            <div class="field-error">
+                {{ errors.get('udise_code') }}
+            </div>
+            {% endif %}
+
+            <!-- ADDRESS -->
+            <label for="address">Address</label>
+            <textarea
+                id="address"
+                name="address"
+                placeholder="Enter address"
+                required
+            >{{ form_data.address if form_data else '' }}</textarea>
+
+            <!-- EMAIL -->
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+            value="{{ form_data.email if form_data else '' }}">
+
+            {% if errors and errors.get('email') %}
+            <div class="field-error">
+                {{ errors.get('email') }}
+            </div>
+            {% endif %}
+
+            <!-- PHONE -->
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone"
+            value="{{ form_data.phone if form_data else '' }}">
+
+            {% if errors and errors.get('phone') %}
+            <div class="field-error">
+                {{ errors.get('phone') }}
+            </div>
+            {% endif %}
+
+            <!-- PASSWORD -->
+            <label for="password">Password</label>
+
+            <div class="password-wrapper">
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a strong password"
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$"
+                    title="Password must be at least 8 characters, include uppercase, lowercase, number and special character"
+                    required
+                >
+                 <img
+                    src="{{ url_for('static', filename='images/eye-closed.png') }}"
+                    id="toggleIcon"
+                    class="toggle-password"
+                    onclick="togglePassword()"
+                    alt="Toggle Password"
+                >
+    
+            </div>
+
+            <button type="submit" class="btn">Register</button>
+
+        </form>
+
+        <div class="footer-text">
+            Already have an account?
+            <a href="/login">Login here</a>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script>
+document.getElementById("phone").addEventListener("input", function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+document.getElementById("udise_code").addEventListener("input", function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+</script>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.src = "{{ url_for('static', filename='images/eye-open.png') }}";
+    } else {
+        passwordInput.type = "password";
+        icon.src = "{{ url_for('static', filename='images/eye-closed.png') }}";
+    }
+}
+</script>
+
+</body>
+</html>

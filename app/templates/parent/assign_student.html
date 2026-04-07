@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Assign Student</title>
+<style>
+body{font-family:Arial;background:#f4f6f9;padding:20px;}
+.container{max-width:500px;margin:auto;background:#fff;padding:20px;border-radius:10px;}
+input,select{width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:6px;}
+button{padding:10px;background:#2563eb;color:#fff;border:none;border-radius:6px;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Assign Student</h2>
+
+<a href="/parent/profile" style="
+    display:inline-block;
+    margin-bottom:15px;
+    text-decoration:none;
+    background:#e5e7eb;
+    color:#111827;
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:14px;
+">
+    ← Back to Profile
+</a>
+
+<form method="POST" action="/parent/assign-student-full">
+
+    <!-- PARENT -->
+    <label>Select Parent</label>
+    <select name="parent_id" required>
+        {% for p in parents %}
+        <option value="{{ p.id }}">{{ p.name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- STUDENT DETAILS -->
+    <label>Student Name</label>
+    <input type="text" name="name">
+
+    <label>Roll No</label>
+    <input type="text" name="roll_no" required>
+
+    <label>Class (Standard)</label>
+    <input type="text" name="std">
+
+    <label>Division</label>
+    <input type="text" name="division">
+
+    <label>RFID</label>
+    <input type="text" name="rfid_tag">
+
+    <label>QR Code</label>
+    <input type="text" name="qr_code">
+
+    <button type="submit">Assign Student</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

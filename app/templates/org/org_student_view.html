@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .container {
+            max-width: 720px;
+            margin: 40px auto;
+        }
+        a {
+            text-decoration: none;
+            color: #0d6efd;
+            font-size: 14px;
+        }
+        h2 {
+            margin: 15px 0 20px;
+            color: #212529;
+        }
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+        }
+        .row:last-child { border-bottom: none; }
+        .label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .paid {
+            color: #198754;
+            font-weight: 600;
+        }
+        .due {
+            color: #dc3545;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/org/students">← Back to Students</a>
+    <h2>Student Details</h2>
+    <a href="/org/students/pdf/{{ student.id }}"
+   style="
+       margin-left:15px;
+       padding:8px 14px;
+       background:#0d6efd;
+       color:#fff;
+       border-radius:5px;
+       font-size:14px;
+       text-decoration:none;
+   ">
+    ⬇ Download PDF
+</a>
+
+<br><br>
+    <div class="card">
+
+        <div class="row"><span class="label">Name</span><span>{{ student.name }}</span></div>
+        <div class="row"><span class="label">Roll No</span><span>{{ student.roll_no }}</span></div>
+        <div class="row"><span class="label">Class</span><span>{{ student.std }} {{ student.division }}</span></div>
+        <div class="row"><span class="label">Parent</span><span>{{ student.parent or '-' }}</span></div>
+        <div class="row"><span class="label">Stop</span><span>{{ student.stop_name or '-' }}</span></div>
+        <div class="row"><span class="label">Bus</span><span>{{ student.bus_number or '-' }}</span></div>
+        <div class="row"><span class="label">Route</span><span>{{ student.route_name or '-' }}</span></div>
+
+        <div class="row">
+            <span class="label">Pickup Time</span>
+            <span>
+                {{ "%02d:%02d"|format(
+                    student.start_time.seconds // 3600,
+                    (student.start_time.seconds // 60) % 60
+                ) if student.start_time else '-' }}
+            </span>
+        </div>
+
+        <div class="row">
+            <span class="label">Drop Time</span>
+            <span>
+                {{ "%02d:%02d"|format(
+                    student.drop_time.seconds // 3600,
+                    (student.drop_time.seconds // 60) % 60
+                ) if student.drop_time else '-' }}
+            </span>
+        </div>
+
+        <div class="row"><span class="label">Driver</span><span>{{ student.driver or '-' }}</span></div>
+
+        <!-- 💰 BUS FEE SECTION -->
+        <div class="row">
+            <span class="label">Monthly Bus Fee</span>
+            <span>₹ {{ student.total_fee or 0 }}</span>
+        </div>
+
+        <div class="row">
+            <span class="label">Amount Paid</span>
+            <span>₹ {{ student.amount_paid }}</span>
+        </div>
+
+        <div class="row">
+            <span class="label">Remaining Fee</span>
+            {% if student.remaining_fee > 0 %}
+                <span class="due">₹ {{ student.remaining_fee }} Due</span>
+            {% else %}
+                <span class="paid">Paid</span>
+            {% endif %}
+        </div>
+
+        <div class="row"><span class="label">RFID</span><span>{{ student.rfid_tag or '-' }}</span></div>
+        <div class="row"><span class="label">QR Code</span><span>{{ student.qr_code or '-' }}</span></div>
+
+    </div>
+</div>
+
+</body>
+</html>

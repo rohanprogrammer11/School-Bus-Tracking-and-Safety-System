@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parent Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ================= BRAND THEME ================= */
+:root{
+    --brand-primary:#2563eb;
+    --brand-secondary:#22c55e;
+    --brand-soft:#eff6ff;
+
+    --text-main:#1f2937;
+    --text-muted:#6b7280;
+
+    --bg-page:#f8fafc;
+    --bg-card:#ffffff;
+
+    --border-light:#e5e7eb;
+    --shadow-soft:0 8px 22px rgba(0,0,0,0.06);
+}
+
+/* ================= RESET ================= */
+*{
+    box-sizing:border-box;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg-page);
+    color:var(--text-main);
+}
+
+/* ================= HEADER ================= */
+header{
+    background:#ffffff;
+    border-bottom:1px solid var(--border-light);
+    padding:14px 18px;
+}
+
+header h2{
+    margin:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:18px;
+    font-weight:600;
+    color:var(--brand-primary);
+}
+
+.nav-links{
+    display:flex;
+    gap:18px;
+}
+
+.nav-links a{
+    color:var(--text-muted);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:500;
+}
+
+.nav-links a:hover{
+    color:var(--brand-primary);
+}
+
+/* ================= LAYOUT ================= */
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:18px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+}
+
+/* ================= CARD ================= */
+.card{
+    background:var(--bg-card);
+    border-radius:16px;
+    padding:18px;
+    box-shadow:var(--shadow-soft);
+    position:relative;
+    transition: all 0.25s ease;
+}
+
+.card:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* ================= STATUS ================= */
+.badge{
+    position:absolute;
+    top:16px;
+    right:16px;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    color:#fff;
+}
+
+.picked{background:var(--brand-secondary);}
+.dropped{background:var(--brand-primary);}
+.absent{background:#ef4444;}
+
+/* ================= SECTIONS ================= */
+.section{
+    margin-bottom:10px;
+    padding:6px 0;
+}
+
+.section-title{
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-bottom:6px;
+    text-transform:uppercase;
+}
+
+/* ================= ROW ================= */
+.row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    margin:6px 0;
+}
+
+.row span{
+    flex:1;
+}
+
+/* ================= BUTTONS ================= */
+.btn{
+    display:inline-block;
+    background:var(--brand-secondary);
+    color:#fff;
+    padding:8px 16px;
+    border-radius:10px;
+    font-size:13px;
+    text-decoration:none;
+    font-weight:600;
+    min-width:140px;
+    text-align:center;
+    transition: 0.25s;
+}
+
+/* Call buttons */
+.row .btn{
+    width:10%;
+    margin-left:10px;
+}
+
+/* Feedback / Primary */
+.btn.secondary{
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+    box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+    width:10%;
+}
+
+.btn.secondary1{
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+    box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+    width:100%;
+}
+
+.btn:hover{
+    opacity:.9;
+    transform: translateY(-2px);
+}
+
+/* ================= DIVIDER ================= */
+.divider{
+    height:1px;
+    background:var(--border-light);
+    margin:12px 0;
+}
+
+/* ================= STUDENT ================= */
+.student-name{
+    font-size:17px;
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+.info{
+    background:#f9fafb;
+    padding:10px;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+.info p{
+    margin:4px 0;
+    font-size:14px;
+    color:#374151;
+}
+
+/* ================= MAP ================= */
+.map-btn{
+    display:block;
+    margin-top:14px;
+    background:var(--brand-soft);
+    color:var(--brand-primary);
+    padding:10px;
+    border-radius:12px;
+    text-align:center;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    border:1px solid var(--border-light);
+    transition:0.2s;
+}
+
+.map-btn:hover{
+    background:#dbeafe;
+}
+
+/* ================= DETAILS ================= */
+details{
+    margin-top:14px;
+    background:#f9fafb;
+    padding:12px;
+    border-radius:12px;
+}
+
+summary{
+    cursor:pointer;
+    font-weight:600;
+    font-size:14px;
+}
+
+/* ================= TABLE ================= */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:13px;
+}
+
+th,td{
+    padding:8px;
+    border-bottom:1px solid var(--border-light);
+    text-align:center;
+}
+
+th{
+    color:var(--text-muted);
+    font-weight:600;
+}
+
+/* ================= MODAL ================= */
+#feedbackModal{
+    backdrop-filter: blur(4px);
+}
+
+#feedbackModal > div{
+    animation: fadeInUp 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+/* Modal form */
+#feedbackModal select,
+#feedbackModal textarea{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #e5e7eb;
+    margin-top:6px;
+    font-size:14px;
+}
+
+#feedbackModal textarea{
+    height:90px;
+    resize:none;
+}
+
+#feedbackModal h3{
+    margin-top:0;
+    color:#2563eb;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:600px){
+    header h2{font-size:16px}
+
+    .row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .row .btn{
+        width:100%;
+        margin-left:0;
+    }
+
+    .btn,.map-btn{
+        width:100%;
+        text-align:center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>
+    👨‍👩‍👧 Parent Dashboard
+    <div class="nav-links">
+        <a href="/parent/notifications">🔔 Notifications <span id="notifBadge"></span></a>
+        <a href="/parent/profile">👤 Profile</a>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+</h2>
+</header>
+
+<div class="container">
+
+{% if students %}
+<div class="cards">
+{% for s in students %}
+{% set attendance = attendance_map.get(s.id) %}
+{% set history = attendance_history_map.get(s.id, []) %}
+{% set bus_location = location_map.get(s.bus_id) %}
+{% set driver = driver_map.get(s.bus_id) %}
+
+<div class="card">
+
+{% if attendance %}
+    {% if attendance.status == 'PICKED' %}
+        <span class="badge picked">Picked</span>
+    {% elif attendance.status == 'DROPPED' %}
+        <span class="badge dropped">Dropped</span>
+    {% else %}
+        <span class="badge absent">Absent</span>
+    {% endif %}
+{% else %}
+    <span class="badge absent">No Record</span>
+{% endif %}
+
+<!-- SCHOOL FIRST -->
+<div class="section">
+    <div class="section-title">School</div>
+    <div class="row"><span>{{ org_name }}</span></div>
+    <div class="row">
+        <span>{{ org_phone }}</span>
+        <a class="btn secondary" href="tel:{{ org_phone }}">Call School</a>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DRIVER -->
+<div class="section">
+    <div class="section-title">Driver</div>
+    {% if driver %}
+        <div class="row"><span>{{ driver.name }} ({{ driver.code }})</span></div>
+        <div class="row">
+            <span>{{ driver.phone }}</span>
+            <a class="btn" href="tel:{{ driver.phone }}">Call Driver</a>
+        </div>
+    {% else %}
+        <div class="row"><span>Not assigned</span></div>
+    {% endif %}
+</div>
+<div class="divider"></div>
+
+<!-- ADDED: DRIVER FEEDBACK -->
+<div class="section">
+    <div class="section-title">Feedback</div>
+
+    {% if driver %}
+        <button class="btn secondary1"
+            onclick="openFeedbackModal(
+                '{{ s.id }}',
+                '{{ driver.code }}',
+                '{{ driver.name }}',
+                '{{ s.name }}'
+            )">
+            ⭐ Give Feedback
+        </button>
+    {% else %}
+        <span>No driver available</span>
+    {% endif %}
+</div>
+<div class="divider"></div>
+
+<div class="student-name">👦 {{ s.name }}</div>
+
+<div class="info">
+    <p><strong>Roll:</strong> {{ s.roll_no }}</p>
+    <p><strong>Bus:</strong> {{ s.bus_number or "Not Assigned" }}</p>
+    <p><strong>Route:</strong> {{ s.route_name or "Not Assigned" }}</p>
+    <p><strong>Stop:</strong> {{ s.stop_name or "Not Assigned" }}</p>
+
+    {% if attendance %}
+        <p><strong>Pickup:</strong> {{ attendance.pickup_time or "-" }}</p>
+        <p><strong>Drop:</strong> {{ attendance.drop_time or "-" }}</p>
+    {% endif %}
+</div>
+
+{% if bus_location and s.bus_id %}
+<a class="map-btn" target="_blank" href="{{ url_for('parent.parent_live_map', bus_id=s.bus_id) }}">
+📍 Track Live Bus
+</a>
+{% endif %}
+
+<details>
+<summary>View Full Details & Attendance</summary>
+{% if history %}
+<table>
+<tr><th>Date</th><th>Status</th><th>Pickup</th><th>Drop</th></tr>
+{% for h in history %}
+<tr>
+<td>{{ h.date }}</td>
+<td>{{ h.status }}</td>
+<td>{{ h.pickup_time or "-" }}</td>
+<td>{{ h.drop_time or "-" }}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No attendance history available.</p>
+{% endif %}
+</details>
+
+</div>
+{% endfor %}
+</div>
+{% else %}
+<p>No students assigned to your account.</p>
+{% endif %}
+
+</div>
+
+<!-- ADDED: FEEDBACK MODAL -->
+<div id="feedbackModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+
+    <div style="background:#fff; width:90%; max-width:400px; margin:80px auto; padding:20px; border-radius:12px;">
+
+        <h3>Submit Feedback</h3>
+
+        <form id="feedbackForm">
+            <input type="hidden" name="student_id" id="student_id">
+            <input type="hidden" name="driver_code" id="driver_code">
+
+            <p id="driverInfo"></p>
+
+            <label>Rating</label>
+            <select name="rating" required>
+                <option value="">Select</option>
+                <option value="1">1 ⭐</option>
+                <option value="2">2 ⭐</option>
+                <option value="3">3 ⭐</option>
+                <option value="4">4 ⭐</option>
+                <option value="5">5 ⭐</option>
+            </select>
+
+            <label>Message</label>
+            <textarea name="message" style="width:100%"></textarea>
+
+            <br><br>
+
+            <button type="submit" class="btn">Submit</button>
+            <button type="button" onclick="closeModal()" class="btn secondary">Cancel</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+function loadParentNotificationCount(){
+    fetch("/parent/notifications/unread-count",{credentials:"same-origin"})
+    .then(r=>r.json())
+    .then(d=>{
+        const b=document.getElementById("notifBadge");
+        b.textContent=d.count>0?`(${d.count})`:"";
+    });
+}
+loadParentNotificationCount();
+setInterval(loadParentNotificationCount,15000);
+</script>
+<script>
+// ADDED: Open modal
+function openFeedbackModal(studentId, driverCode, driverName, studentName){
+    document.getElementById("feedbackModal").style.display = "block";
+
+    document.getElementById("student_id").value = studentId;
+    document.getElementById("driver_code").value = driverCode;
+
+    document.getElementById("driverInfo").innerText =
+        "Driver: " + driverName + " | Student: " + studentName;
+}
+
+// ADDED: Close modal
+function closeModal(){
+    document.getElementById("feedbackModal").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    document.getElementById("feedbackForm").addEventListener("submit", function(e){
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("/parent/submit-feedback", {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("SERVER RESPONSE:", data); // ✅ DEBUG
+
+            if(data.status === "success"){
+                alert("✅ " + data.message);
+                closeModal();
+            } else {
+                alert("❌ " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error("FETCH ERROR:", err); // ✅ DEBUG
+            alert("❌ Server error — check console");
+        });
+
+    });
+
+});
+</script>
+</body>
+</html>

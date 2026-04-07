@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Driver Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f6f9;
+    color:#111827
+}
+
+/* ================= NAVBAR ================= */
+.navbar{
+    background:#111827;
+    color:#fff;
+    padding:14px 26px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 6px 18px rgba(0,0,0,.35)
+}
+.brand{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.3px
+}
+
+/* ================= BURGER ================= */
+.burger-wrapper{position:relative;cursor:pointer}
+.burger{
+    width:30px;
+    height:22px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between
+}
+.burger span{
+    height:3px;
+    width:100%;
+    background:#fff;
+    border-radius:3px;
+    transition:.3s
+}
+.burger.active span:nth-child(1){
+    transform:rotate(45deg) translate(5px,5px)
+}
+.burger.active span:nth-child(2){opacity:0}
+.burger.active span:nth-child(3){
+    transform:rotate(-45deg) translate(5px,-5px)
+}
+
+/* 🔴 Notification dot */
+.notif-dot{
+    position:absolute;
+    top:-6px;
+    right:-6px;
+    background:#ef4444;
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    min-width:18px;
+    height:18px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 0 2px #111827
+}
+
+/* ================= SIDE MENU ================= */
+.side-menu{
+    position:fixed;
+    top:0;
+    right:-320px;                 /* hidden by default */
+    width:300px;
+    height:100vh;
+    background:#ffffff;
+    box-shadow:-10px 0 30px rgba(0,0,0,.25);
+    transition:right .3s ease;
+    z-index:2000;
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+}
+.side-menu.open{
+    right:0;                      /* slide in */
+}
+.side-menu-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px solid #e5e7eb;
+    margin-bottom:18px;
+    font-size:16px;
+    font-weight:700;
+}
+
+.close-btn{
+    background:transparent;
+    border:none;
+    width:18px;          /* ⬅ narrow */
+    height:18px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:700;
+    line-height:1;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#374151;
+}
+
+.close-btn:hover{
+    color:#111827;
+}
+
+.side-menu button{
+    width:100%;
+    padding:12px 14px;
+    margin-bottom:12px;
+    border:none;
+    background:#f3f4f6;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:.2s
+}
+.side-menu button:hover{
+    background:#e5e7eb
+}
+
+/* Badge inside side menu */
+.notif-badge{
+    background:#ef4444;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-left:auto
+}
+
+/* Backdrop */
+.menu-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.25);
+    display:none;
+    z-index:1500
+}
+.menu-backdrop.show{display:block}
+
+/* ================= LAYOUT ================= */
+.container{
+    max-width:1250px;
+    margin:30px auto;
+    padding:0 15px
+}
+.card{
+    background:#fff;
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:24px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08)
+}
+.card h3{margin:0 0 16px}
+.info-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px
+}
+.info-box{
+    background:#f1f3f5;
+    border-radius:8px;
+    padding:14px 16px;
+    min-height:80px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center
+}
+.pickup-box{border-left:6px solid #198754}
+.drop-box{border-left:6px solid #0d6efd}
+
+.status{font-weight:bold;font-size:13px;margin-top:6px}
+.status.started{color:#198754}
+.status.completed{color:#6c757d}
+.status.not-started{color:#dc3545}
+
+/* ================= TABLE ================= */
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+    margin-top:10px
+}
+th,td{
+    padding:12px 10px;
+    border-bottom:1px solid #dee2e6;
+    text-align:left
+}
+th{background:#f1f3f5}
+
+/* ================= BUTTONS ================= */
+.trip-btn{
+    margin-top:10px;
+    padding:8px 14px;
+    border:none;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:bold;
+    cursor:pointer;
+    width:100%
+}
+.start-btn{background:#198754;color:#fff}
+.end-btn{background:#dc3545;color:#fff}
+
+/* ================= TOAST ================= */
+.notif-toast{
+    position:fixed;
+    bottom:25px;
+    right:25px;
+    background:#111827;
+    color:#fff;
+    padding:14px 18px;
+    border-radius:10px;
+    font-weight:600;
+    opacity:0;
+    transform:translateY(20px);
+    transition:.3s;
+    z-index:3000
+}
+.notif-toast.show{
+    opacity:1;
+    transform:translateY(0)
+}
+
+/* Mobile */
+@media(max-width:768px){
+    .header-actions{display:none}
+    .burger{display:flex}
+}
+
+/* Notification badge inside menu */
+.notif-btn{
+    position:relative;
+}
+
+.notif-badge{
+    background:#ef4444;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    margin-left:auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+}
+
+/* Pulse like Google apps */
+.notif-badge.pulse{
+    animation:pulse 1.2s infinite;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="brand">🚌 Driver Dashboard</div>
+    <div class="header-actions"></div>
+
+    <div class="burger-wrapper" onclick="toggleMenu()">
+        <div class="burger" id="burgerBtn">
+            <span></span><span></span><span></span>
+        </div>
+        <span id="notifDot" class="notif-dot" style="display:none"></span>
+    </div>
+</div>
+
+<div class="menu-backdrop" id="menuBackdrop" onclick="toggleMenu()"></div>
+
+
+<!-- ================= SIDE MENU ================= -->
+<div class="side-menu" id="sideMenu">
+    <div class="side-menu-header">
+        <span>Quick Driver Update</span>
+        <button class="close-btn" onclick="toggleMenu()">−</button>
+    </div>
+
+    <button onclick="sendQuickAlert('🛞 Bus puncture – changing tyre')">🛞 Tyre Puncture</button>
+    <button onclick="sendQuickAlert('⏱️ Delayed due to traffic')">⏱️ Traffic Delay</button>
+    <button onclick="sendQuickAlert('🚌 Bus breakdown – maintenance required')">🚌 Bus Breakdown</button>
+    <button onclick="sendQuickAlert('⛽ Fuel stop – will resume shortly')">⛽ Fuel Stop</button>
+    <button onclick="sendQuickAlert('🌧️ Weather issue – driving cautiously')">🌧️ Weather Issue</button>
+    <hr>
+    <button onclick="sendSOS()" style="background:#dc3545;color:#fff">🚨 SOS</button>
+    <button onclick="openNotifications()" class="notif-btn">
+        🔔 Notifications
+        <span id="notifBadge" class="notif-badge" style="display:none">0</span>
+    </button>
+    <button onclick="location.href='/driver/history'">📜 Pickup / Drop History</button>
+    <button onclick="location.href='/logout'">🚪 Logout</button>
+</div>
+
+<!-- 🔊 SOUND -->
+<audio id="notifSound" preload="auto">
+    <source src="/static/sounds/notification.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container">
+
+<!-- DRIVER INFO -->
+<div class="card">
+<h3>Driver Information</h3>
+<div class="info-row">
+    <div class="info-box"><strong>Name:</strong> {{ driver.name }}</div>
+    <div class="info-box"><strong>Phone:</strong> {{ driver.phone }}</div>
+    <div class="info-box"><strong>Email:</strong> {{ driver.email }}</div>
+</div>
+</div>
+
+<!-- ASSIGNMENT -->
+<div class="card">
+<h3>Assigned Route & Bus</h3>
+<div class="info-row">
+    <div class="info-box"><strong>Bus:</strong> {{ bus_number or '-' }}</div>
+    <div class="info-box"><strong>Route:</strong> {{ route_name or '-' }}</div>
+    <div class="info-box"><strong>Date:</strong> {{ trip_date.strftime("%d %b %Y") if trip_date else '-' }}</div>
+</div>
+
+<div class="info-row" style="margin-top:15px">
+
+<!-- PICKUP -->
+<div class="info-box pickup-box">
+<span>🟢 Pickup</span>
+<strong{{ pickup_time or '-' }}</strong>
+{% set p_status = pickup.trip_status or 'NOT_STARTED' %}
+<small class="status {{ 'started' if p_status=='STARTED' else 'completed' if p_status=='COMPLETED' else 'not-started' }}">
+{{ "ON TRIP" if p_status=='STARTED' else "COMPLETED" if p_status=='COMPLETED' else "NOT STARTED" }}
+</small>
+{% if p_status=='STARTED' %}
+<form method="POST" action="/driver/end-trip">
+<input type="hidden" name="assignment_id" value="{{ pickup.assignment_id }}">
+<button class="trip-btn end-btn">⏹ End Pickup</button>
+</form>
+{% else %}
+<form method="POST" action="/driver/start-trip" target="_blank">
+<input type="hidden" name="assignment_id" value="{{ pickup.assignment_id }}">
+<button class="trip-btn start-btn">▶ Start Pickup</button>
+</form>
+{% endif %}
+</div>
+
+<!-- DROP -->
+<div class="info-box drop-box">
+<span>🔵 Drop</span>
+<strong>{{ drop_time }}</strong>
+{% set d_status = drop.trip_status or 'NOT_STARTED' %}
+<small class="status {{ 'started' if d_status=='STARTED' else 'completed' if d_status=='COMPLETED' else 'not-started' }}">
+{{ "ON TRIP" if d_status=='STARTED' else "COMPLETED" if d_status=='COMPLETED' else "NOT STARTED" }}
+</small>
+{% if d_status=='STARTED' %}
+<form method="POST" action="/driver/end-trip">
+<input type="hidden" name="assignment_id" value="{{ drop.assignment_id }}">
+<button class="trip-btn end-btn">⏹ End Drop</button>
+</form>
+{% else %}
+<form method="POST" action="/driver/start-trip" target="_blank">
+<input type="hidden" name="assignment_id" value="{{ drop.assignment_id }}">
+<button class="trip-btn start-btn">▶ Start Drop</button>
+</form>
+{% endif %}
+</div>
+</div>
+</div>
+
+<!-- STUDENTS -->
+<div class="card">
+<h3>Students Assigned to Route</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Name</th><th>Roll</th><th>Class</th><th>Stop</th></tr>
+</thead>
+<tbody>
+{% for s in students %}
+<tr>
+    <td>{{ loop.index }}</td>
+    <td>{{ s.name }}</td>
+    <td>{{ s.roll_no }}</td>
+    <td>{{ s.class_id }}</td>
+    <td>{{ s.stop_name }}</td>
+    <td>
+        <button onclick="markPickup({{ s.id }})">🟢 Pickup</button>
+        <button onclick="markDrop({{ s.id }})">🔵 Drop</button>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+function toggleMenu(){
+    document.getElementById("sideMenu").classList.toggle("open");
+    document.getElementById("burgerBtn").classList.toggle("active");
+    document.getElementById("menuBackdrop").classList.toggle("show");
+}
+
+function sendQuickAlert(message){
+    if(!confirm("Send this update with live location?\n\n"+message)) return;
+
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported");
+        return;
+    }
+
+    // ⛔ Pause auto refresh
+    autoRefreshEnabled = false;
+
+    navigator.geolocation.getCurrentPosition(
+        position => {
+
+            fetch("/driver/send-quick-alert",{
+                method:"POST",
+                credentials:"same-origin",
+                headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify({
+                    bus_id: "{{ bus_id }}",
+                    message: message,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                })
+            })
+            .then(res => {
+                if(!res.ok) throw new Error("Failed");
+                alert("Update sent with live location ✅");
+                toggleMenu();
+            })
+            .catch(() => {
+                alert("Failed to send update ❌");
+            })
+            .finally(() => {
+                // ▶ Resume auto refresh after 2 seconds
+                setTimeout(() => {
+                    autoRefreshEnabled = true;
+                }, 2000);
+            });
+
+        },
+        error => {
+            alert("Unable to fetch live location");
+            autoRefreshEnabled = true;
+        },
+        { enableHighAccuracy: true }
+    );
+}
+</script>
+
+<script>
+let sosTrackingInterval = null;
+
+function sendSOS() {
+    if (!confirm("Send SOS with live location?")) return;
+
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported");
+        return;
+    }
+
+    // First SOS send
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            sendSOSOnce(position);
+
+            // Start continuous live tracking every 10 seconds
+            sosTrackingInterval = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(
+                    sendLiveLocation,
+                    err => console.error("Location error", err),
+                    { enableHighAccuracy: true }
+                );
+            }, 10000);
+        },
+        () => alert("Location permission denied"),
+        { enableHighAccuracy: true }
+    );
+}
+
+function sendSOSOnce(position) {
+    fetch("/driver/send-sos", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            bus_id: "{{ bus_id }}",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            description: "Emergency SOS triggered by driver"
+        })
+    })
+    .then(res => res.json())
+    .then(data => alert(data.status))
+    .catch(() => alert("Failed to send SOS"));
+}
+
+function sendLiveLocation(position) {
+    fetch("/driver/location-update", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            bus_id: "{{ bus_id }}",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            speed: position.coords.speed || 0
+        })
+    });
+}
+</script>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+function toggleMenu(){
+    const menu = document.getElementById("sideMenu");
+    const isOpen = menu.classList.toggle("open");
+
+    notificationsOpen = isOpen;   // ✅ IMPORTANT
+
+    // Stop sound immediately if open
+    if(isOpen){
+        notifSound.pause();
+        notifSound.currentTime = 0;
+    }
+}
+/* ---------- NOTIFICATION LOGIC ---------- */
+let lastCount = parseInt(localStorage.getItem("driver_last_notif")) || 0;
+
+function showToast(){
+    const t = document.getElementById("notifToast");
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"),3000);
+}
+
+function loadNotificationCount(){
+    fetch("/driver/notifications/unread-count",{credentials:"same-origin"})
+    .then(res=>res.json())
+    .then(data=>{
+        const count = data.count || 0;
+
+        const dot   = document.getElementById("notifDot");    // burger
+        const badge = document.getElementById("notifBadge");  // menu
+
+        if(count > 0){
+            /* Burger icon */
+            dot.style.display = "flex";
+            dot.textContent = count;
+            dot.classList.add("pulse");
+
+            /* Menu badge */
+            badge.style.display = "inline-flex";
+            badge.textContent = count;
+            badge.classList.add("pulse");
+
+            /* Play sound only for NEW notifications */
+            if(count > lastCount){
+                const sound = document.getElementById("notifSound");
+                sound.currentTime = 0;
+                sound.play().catch(()=>{});
+            }
+
+        }else{
+            dot.style.display = "none";
+            badge.style.display = "none";
+            dot.classList.remove("pulse");
+            badge.classList.remove("pulse");
+        }
+
+        lastCount = count;
+        localStorage.setItem("driver_last_notif", count);
+    });
+}
+
+function openNotifications(){
+    notificationsOpen = true;
+
+    // Stop sound
+    notifSound.pause();
+    notifSound.currentTime = 0;
+
+    fetch("/driver/notifications/mark-read",{method:"POST"})
+    .then(()=>{
+        localStorage.setItem("driver_last_notif", 0);
+        location.href = "/driver/notifications";
+    });
+}
+
+loadNotificationCount();
+setInterval(loadNotificationCount, 1000);
+</script>
+
+<script>
+const notifSound = document.getElementById("notifSound");
+let lastCount = parseInt(localStorage.getItem("driver_last_notif")) || 0;
+
+/* Prime audio on first user click */
+document.addEventListener("click", () => {
+    notifSound.muted = true;
+    notifSound.play().then(() => {
+        notifSound.pause();
+        notifSound.currentTime = 0;
+        notifSound.muted = false;
+    }).catch(()=>{});
+}, { once:true });
+
+function playNotificationSound(){
+    notifSound.currentTime = 0;
+    notifSound.play().catch(()=>{});
+    setTimeout(() => {
+        notifSound.pause();
+        notifSound.currentTime = 0;
+    }, 3000);
+}
+
+function loadNotificationCount(){
+    fetch("/driver/notifications/unread-count",{credentials:"same-origin"})
+    .then(res=>res.json())
+    .then(data=>{
+        const count = data.count || 0;
+
+        if(count > lastCount && !notificationsOpen){
+            playNotificationSound();
+        }
+
+        lastCount = count;
+        localStorage.setItem("driver_last_notif", count);
+    });
+}
+
+loadNotificationCount();
+setInterval(loadNotificationCount, 300);
+</script>
+
+<script>
+function markPickup(studentId){
+    if(!confirm("Confirm PICKUP for this student?")) return;
+    sendAttendance(studentId, "pickup");
+}
+
+function markDrop(studentId){
+    if(!confirm("Confirm DROP for this student?")) return;
+    sendAttendance(studentId, "drop");
+}
+
+function sendAttendance(studentId, type){
+    if(!navigator.geolocation){
+        alert("Location not supported");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        fetch("/driver/student-attendance",{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            credentials:"same-origin",
+            body: JSON.stringify({
+                student_id: studentId,
+                action: type,
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude
+            })
+        })
+        .then(res => res.json())
+        .then(data => alert(data.message))
+        .catch(() => alert("Failed ❌"));
+    });
+}
+</script>
+
+
+</body>
+</html>

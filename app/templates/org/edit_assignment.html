@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Assignment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        h3 {
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #fff;
+            background: #0d6efd;
+        }
+        .btn-back {
+            background: #6c757d;
+            text-decoration: none;
+            display: inline-block;
+            line-height: 32px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="card">
+        <h3>✏️ Edit Assignment</h3>
+
+        <form method="POST">
+
+            <!-- ASSIGNMENT CODE (READ ONLY) -->
+            <label>Assignment ID</label>
+            <input type="text" value="{{ assignment.assignment_code }}" readonly>
+
+            <!-- DRIVER (VISIBLE + EDITABLE) -->
+            <label>Driver</label>
+            <select name="driver_id" required>
+                {% for d in drivers %}
+                    <option value="{{ d.id }}"
+                        {% if d.id == assignment.driver_id %}selected{% endif %}>
+                        {{ d.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+
+            <!-- BUS -->
+            <label>Bus</label>
+            <select name="bus_id" required>
+                {% for b in buses %}
+                    <option value="{{ b.id }}"
+                        {% if b.id == assignment.bus_id %}selected{% endif %}>
+                        {{ b.bus_number }}
+                    </option>
+                {% endfor %}
+            </select>
+
+
+            <!-- ROUTE -->
+            <label>Route</label>
+            <select name="route_id" required>
+                {% for r in routes %}
+                    <option value="{{ r.id }}"
+                        {% if r.id == assignment.route_id %}selected{% endif %}>
+                        {{ r.route_name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- ASSIGNMENT TYPE -->
+            <label>Assignment Type</label>
+            <select name="assignment" required>
+                <option value="PICKUP" {% if assignment.assignment == 'PICKUP' %}selected{% endif %}>
+                    PICKUP
+                </option>
+                <option value="DROP" {% if assignment.assignment == 'DROP' %}selected{% endif %}>
+                    DROP
+                </option>
+            </select>
+
+            <!-- DATE -->
+            <label>Date</label>
+            <input type="date" name="date" value="{{ assignment.assignment_date }}" required>
+
+            <!-- TIME -->
+            <label>Time</label>
+            <input type="time" name="time" value="{{ assignment.assignment_time }}" required>
+
+            <div class="actions">
+                <button type="submit" class="btn">Update</button>
+                <a href="/org/assignments" class="btn btn-back">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+</body>
+</html>

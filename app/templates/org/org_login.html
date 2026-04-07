@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organization Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #212529;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 95%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .footer-text a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+                /* PASSWORD TOGGLE */
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 10px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .field-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: -10px;
+            margin-bottom: 12px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="login-container">
+    <div class="card">
+        <h2>🚌 Organization Login</h2>
+
+        <form action="/login" method="POST">
+
+            <label for="identifier">Email or Mobile</label>
+            <input type="text" id="identifier" name="identifier" placeholder="Enter email or mobile number" required>
+
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                
+                 <img
+                    src="{{ url_for('static', filename='images/eye-closed.png') }}"
+                    id="toggleIcon"
+                    class="toggle-password"
+                    onclick="togglePassword()"
+                    alt="Toggle Password"
+                >
+    
+            </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+            <button type="submit" class="btn">Login</button>
+
+        </form>
+
+        <div class="footer-text">
+            Don’t have an account?
+            <a href="/signup">Register here</a><br><br>
+
+            <a href="/org/forgot-password">Forgot Password?</a><br><br>
+
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+</div>
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.src = "{{ url_for('static', filename='images/eye-open.png') }}";
+    } else {
+        passwordInput.type = "password";
+        icon.src = "{{ url_for('static', filename='images/eye-closed.png') }}";
+    }
+}
+</script>
+
+</body>
+</html>

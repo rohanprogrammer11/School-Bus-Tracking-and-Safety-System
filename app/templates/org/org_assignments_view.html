@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Assignments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            user-select: none;
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #212529;
+            color: #fff;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+        }
+        .btn-link {
+            background: #6c757d;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn-back {
+            background: #6c757d;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header-row">
+        <h3>📋 Assigned Drivers</h3>
+        <div>
+            <a href="/org/assign-driver" class="btn-link">➕ Assign Driver</a>
+            <a href="/org/dashboard" class="btn-link btn-back">⬅ Back</a>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Assignment ID</th>
+                    <th>Driver</th>
+                    <th>Bus</th>
+                    <th>Route</th>
+                    <th>Assignment</th>
+                    <th>Time</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assignments %}
+                <tr>
+                    <td class="nowrap">{{ a.assignment_code }}</td>
+                    <td class="nowrap">{{ a.driver_name }}</td>
+                    <td class="nowrap">{{ a.bus_number }}</td>
+
+                    <td>
+                        <strong>{{ a.route_name }}</strong><br>
+                        <small>From: {{ a.start_point }} → To: {{ a.end_point }}</small>
+                    </td>
+
+                    <td class="nowrap">{{ a.assignment }}</td>
+                    <td class="nowrap">{{ a.assignment_time }}</td>
+                    <td class="nowrap">{{ a.assignment_date }}</td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/org/assign-driver/{{ a.id }}/edit"
+                               class="btn"
+                               style="background:#0d6efd;">
+                                Edit
+                            </a>
+                            <form method="POST"
+                                  action="/org/assign-driver/{{ a.id }}/remove"
+                                  onsubmit="return confirm('Delete this assignment?');">
+                                <button type="submit" class="btn">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

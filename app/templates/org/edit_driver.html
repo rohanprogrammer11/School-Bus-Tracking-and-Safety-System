@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Driver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        h3 {
+            margin-bottom: 15px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .mb-3 {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #198754;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<script>
+function previewPhoto(event) {
+    const reader = new FileReader();
+    reader.onload = function() {
+        document.getElementById('photoPreview').src = reader.result;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
+
+
+<body>
+
+<div class="container">
+    <h3>✏️ Edit Driver</h3>
+
+    <!-- IMPORTANT -->
+    <form method="POST" enctype="multipart/form-data" class="form-card">
+
+        <!-- CURRENT PHOTO -->
+    <div style="margin-bottom:10px;">
+        {% if driver.photo_path %}
+            <img id="photoPreview"
+                 src="{{ url_for('static', filename=driver.photo_path) }}"
+                 style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:1px solid #ddd;">
+        {% else %}
+            <img id="photoPreview"
+                 src="{{ url_for('static', filename='default-user.png') }}"
+                 style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:1px solid #ddd;">
+        {% endif %}
+    </div>
+
+    <!-- NEW PHOTO UPLOAD -->
+    <input type="file"
+           name="photo"
+           accept="image/*"
+           onchange="previewPhoto(event)">
+
+        <div class="mb-3">
+            <label>Driver Name</label>
+            <input type="text" name="name" value="{{ driver.name }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ driver.email }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Phone</label>
+            <input type="text" name="phone" value="{{ driver.phone }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Driver Code</label>
+            <input type="text" value="{{ driver.driver_code }}" disabled>
+        </div>
+
+        <div class="mb-3">
+            <label>License Number</label>
+            <input type="text" name="license_number" value="{{ driver.license_number }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>License Type</label>
+            <select name="license_type">
+                <option value="">Select License Type</option>
+                <option value="LMV" {% if driver.license_type == 'LMV' %}selected{% endif %}>LMV</option>
+                <option value="HMV" {% if driver.license_type == 'HMV' %}selected{% endif %}>HMV</option>
+                <option value="HTV" {% if driver.license_type == 'HTV' %}selected{% endif %}>HTV</option>
+                <option value="PSV" {% if driver.license_type == 'PSV' %}selected{% endif %}>PSV</option>
+                <option value="School Bus" {% if driver.license_type == 'School Bus' %}selected{% endif %}>School Bus</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>License Expiry</label>
+            <input type="date"
+                   name="license_expiry"
+                   value="{{ driver.license_expiry.strftime('%Y-%m-%d') if driver.license_expiry else '' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label>Experience (Years)</label>
+            <input type="number" name="experience_years" value="{{ driver.experience_years }}" min="0">
+        </div>
+
+        <div class="mb-3">
+            <label>Blood Group</label>
+            <select name="blood_group">
+                <option value="">Select Blood Group</option>
+                <option value="A+" {% if driver.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                <option value="A-" {% if driver.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                <option value="B+" {% if driver.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                <option value="B-" {% if driver.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                <option value="O+" {% if driver.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                <option value="O-" {% if driver.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                <option value="AB+" {% if driver.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                <option value="AB-" {% if driver.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Emergency Contact</label>
+            <input type="text" name="emergency_contact" value="{{ driver.emergency_contact }}">
+        </div>
+
+        <hr>
+
+        <!-- DRIVER DOCUMENTS -->
+
+        <div class="mb-3">
+            <label>Driving License (PDF)</label>
+            <input type="file" name="license_pdf" accept="application/pdf">
+        </div>
+
+        <div class="mb-3">
+            <label>Aadhaar Card Number</label>
+            <input type="text"
+                   name="aadhar_doc_number"
+                   value="{{ documents.get('AADHAR').doc_number if documents and documents.get('AADHAR') else '' }}">
+            <input type="file" name="aadhar_pdf" accept="application/pdf">
+        </div>
+
+        <div class="mb-3">
+            <label>Medical Certificate (PDF)</label>
+            <input type="file" name="medical_pdf" accept="application/pdf">
+        </div>
+
+        <div class="mb-3">
+            <label>Monthly Salary (₹)</label>
+            <input type="number" name="monthly_salary"
+                   value="{{ driver.monthly_salary }}"
+                   min="0" step="0.01" required>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-success">Update Driver</button>
+            <a href="/org/drivers" class="btn btn-secondary">Cancel</a>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>
