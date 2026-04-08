@@ -4,6 +4,13 @@ import uuid
 from app.utils.notification_service import create_notification
 from app.extensions import login_required, get_cursor
 from app.org.blueprint import org_bp
+from flask import make_response
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+import io
+
 
 
 # =====================================================
@@ -391,6 +398,86 @@ def edit_assignment(assignment_id):
             buses=buses,
             routes=routes
         )
+
+    finally:
+        cursor.close()
+        db.close()
+
+
+# =====================================================
+# DOWNLOAD PDF
+# =====================================================
+@org_bp.route("/assignments/pdf")
+@login_required
+def download_assignments_pdf():
+    org_id = session["org_id"]
+    db, cursor = get_cursor()
+
+    try:
+        cursor.execute("""
+            SELECT 
+                da.assignment_code,
+                u.name AS driver_name,
+                b.bus_number,
+                r.route_name,
+                da.assignment,
+                da.assignment_time,
+                da.assignment_date
+            FROM driver_assignment da
+            JOIN users u ON u.id = da.driver_id
+            JOIN buses b ON b.id = da.bus_id
+            JOIN routes r ON r.id = da.route_id
+            WHERE da.org_id=%s
+            ORDER BY da.assignment_date DESC
+        """, (org_id,))
+
+        data = cursor.fetchall()
+
+        # Create PDF buffer
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+
+        styles = getSampleStyleSheet()
+
+        elements = []
+
+        # Title
+        elements.append(Paragraph("Driver Assignments Report", styles["Title"]))
+
+        # Table data
+        table_data = [["Code", "Driver", "Bus", "Route", "Type", "Time", "Date"]]
+
+        for row in data:
+            table_data.append([
+                row["assignment_code"],
+                row["driver_name"],
+                row["bus_number"],
+                row["route_name"],
+                row["assignment"],
+                str(row["assignment_time"]),
+                str(row["assignment_date"])
+            ])
+
+        table = Table(table_data)
+
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 1, colors.black),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ]))
+
+        elements.append(table)
+
+        doc.build(elements)
+
+        buffer.seek(0)
+
+        response = make_response(buffer.read())
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = "attachment; filename=assignments.pdf"
+
+        return response
 
     finally:
         cursor.close()

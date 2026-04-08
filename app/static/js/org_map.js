@@ -92,7 +92,6 @@ function loadRoadRoute() {
 
                     routeLayers.push(line);
 
-                    map.fitBounds(bounds, { padding: [40, 40] });
                 })
                 .catch(err => console.error("OSRM error:", err));
 
@@ -130,4 +129,17 @@ function fetchBusLocation() {
 
     })
     .catch(err => console.error("Org map GPS error:", err));
+}
+
+function updateBusLocation(lat, lng) {
+    const latLng = [lat, lng];
+
+    if (!busMarker) {
+        busMarker = L.marker(latLng).addTo(map);
+    } else {
+        busMarker.setLatLng(latLng);
+    }
+
+    // 👉 ALWAYS center map on driver
+    map.setView(latLng, 16); // zoom 16 for close tracking
 }

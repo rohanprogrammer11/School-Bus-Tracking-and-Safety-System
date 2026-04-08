@@ -315,3 +315,42 @@ navigator.geolocation.watchPosition(
     }
 );
 
+
+/* -------------------------------
+   BACKGROUND LOCATION SENDER
+-------------------------------- */
+setInterval(() => {
+    if (busLat && busLng) {
+        fetch("/driver/location-update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                bus_id: busId,
+                latitude: busLat,
+                longitude: busLng
+            })
+        }).catch(err => console.error("Background send error:", err));
+    }
+}, 5000);
+
+/* -------------------------------
+   PREVENT SCREEN SLEEP
+-------------------------------- */
+let wakeLock = null;
+
+async function keepScreenAwake() {
+    try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        console.log("Wake Lock active");
+    } catch (err) {
+        console.error("Wake Lock error:", err);
+    }
+}
+
+keepScreenAwake();
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        keepScreenAwake();
+    }
+});

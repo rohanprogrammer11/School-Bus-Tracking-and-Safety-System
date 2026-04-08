@@ -1,6 +1,12 @@
 from flask import flash, render_template, request, redirect, session
 from app.extensions import login_required, get_cursor
 from app.org.blueprint import org_bp
+from flask import make_response
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+import io
 
 
 # =========================
@@ -277,3 +283,89 @@ def delete_fuel_price(id):
         db.close()
 
     return redirect("/org/fuel-price")
+
+
+# =========================
+# DOWNLOAD BUS PDF
+# =========================
+@org_bp.route("/buses/pdf")
+@login_required
+def download_buses_pdf():
+    db, cursor = get_cursor()
+
+    try:
+        cursor.execute("""
+            SELECT 
+                b.bus_code,
+                b.bus_number,
+                b.bus_model,
+                b.capacity,
+                b.fuel_type,
+                b.mileage_kmpl,
+                b.status,
+                fp.price_per_unit AS fuel_price
+            FROM buses b
+            LEFT JOIN fuel_price fp
+                ON fp.org_id = b.org_id
+                AND fp.fuel_type = b.fuel_type
+                AND fp.effective_from = (
+                    SELECT MAX(effective_from)
+                    FROM fuel_price
+                    WHERE org_id = b.org_id
+                    AND fuel_type = b.fuel_type
+                )
+            WHERE b.org_id = %s
+        """, (session["org_id"],))
+
+        buses = cursor.fetchall()
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        styles = getSampleStyleSheet()
+
+        elements = []
+
+        # Title
+        elements.append(Paragraph("Bus Management Report", styles["Title"]))
+
+        # Table
+        table_data = [[
+            "Code", "Number", "Model", "Capacity",
+            "Fuel", "Price", "Mileage", "Status"
+        ]]
+
+        for b in buses:
+            table_data.append([
+                b["bus_code"],
+                b["bus_number"],
+                b["bus_model"],
+                str(b["capacity"]),
+                b["fuel_type"],
+                str(b["fuel_price"] or "N/A"),
+                str(b["mileage_kmpl"]),
+                b["status"]
+            ])
+
+        table = Table(table_data)
+
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.black),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ]))
+
+        elements.append(table)
+        doc.build(elements)
+
+        buffer.seek(0)
+
+        response = make_response(buffer.read())
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = "attachment; filename=buses.pdf"
+
+        return response
+
+    finally:
+        cursor.close()
+        db.close()

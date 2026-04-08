@@ -47,14 +47,16 @@ function fetchBusLocation() {
 /* -------------------------------
    LOAD ROUTE + STOPS
 -------------------------------- */
+/* =========================
+   LOAD ROAD ROUTE (SEGMENTS)
+========================= */
 function loadRoute() {
-
-    fetch(`/parent/bus-route/${busId}`)
+    fetch(`/org/api/bus-route/${busId}`, { credentials: "same-origin" })
         .then(res => res.json())
         .then(stops => {
 
             if (!Array.isArray(stops) || stops.length < 2) {
-                console.warn("Not enough stops for route");
+                console.warn("⚠️ Not enough stops for routing");
                 return;
             }
 
@@ -73,7 +75,7 @@ function loadRoute() {
                 bounds.push(latLng);
 
                 L.circleMarker(latLng, {
-                    radius: 6,
+                    radius: 7,
                     color: "#0d6efd",
                     fillColor: "#0d6efd",
                     fillOpacity: 1
@@ -82,11 +84,12 @@ function loadRoute() {
                 .bindTooltip(`${i + 1}. ${s.name}`, {
                     permanent: true,
                     direction: "top",
-                    offset: [0, -8]
+                    offset: [0, -8],
+                    className: "stop-label"
                 });
             });
 
-            // Build OSRM coordinate string
+            // Build coordinate string
             const coordinates = stops
                 .filter(s => s.latitude && s.longitude)
                 .map(s => `${s.longitude},${s.latitude}`)
@@ -101,7 +104,7 @@ function loadRoute() {
                 .then(data => {
 
                     if (!data.routes || !data.routes.length) {
-                        console.warn("No route returned");
+                        console.warn("OSRM returned no route");
                         return;
                     }
 
@@ -116,12 +119,11 @@ function loadRoute() {
 
                     routeLayers.push(line);
 
-                    map.fitBounds(bounds, { padding: [40, 40] });
                 })
-                .catch(err => console.error("Routing error", err));
+                .catch(err => console.error("OSRM error:", err));
 
         })
-        .catch(err => console.error("Route fetch error", err));
+        .catch(err => console.error("Route load error:", err));
 }
 
 /* -------------------------------
@@ -129,4 +131,18 @@ function loadRoute() {
 -------------------------------- */
 loadRoute();
 fetchBusLocation();
-setInterval(fetchBusLocation, 3000);
+setInterval(fetchBusLocation, 5000);
+
+
+function updateBusLocation(lat, lng) {
+    const latLng = [lat, lng];
+
+    if (!busMarker) {
+        busMarker = L.marker(latLng).addTo(map);
+    } else {
+        busMarker.setLatLng(latLng);
+    }
+
+    // 👉 ALWAYS center map on driver
+    map.setView(latLng, 16); // zoom 16 for close tracking
+}
