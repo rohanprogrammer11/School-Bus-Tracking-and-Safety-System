@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, session, flash, url_for
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 import os
+import uuid
 
 from app.extensions import login_required, get_cursor
 from app.org.blueprint import org_bp
@@ -141,7 +142,8 @@ def add_driver():
         photo_path = None
 
         if photo and photo.filename and allowed_file(photo.filename):
-            filename = secure_filename(f"{driver_id}_photo_{photo.filename}")
+            ext = photo.filename.rsplit('.', 1)[1].lower()
+            filename = f"{driver_id}_photo_{uuid.uuid4().hex}.{ext}"
             save_path = os.path.join(UPLOAD_FOLDER, filename)
             photo.save(save_path)
 
@@ -155,9 +157,11 @@ def add_driver():
                 driver_id, driver_code, license_number,
                 license_type, experience_years,
                 license_expiry, blood_group,
-                emergency_contact, monthly_salary, status, photo_path
+                emergency_contact, monthly_salary,
+                status, photo_path,
+                driver_full_name, mobile_number
             )
-             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'ACTIVE',%s)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'ACTIVE',%s,%s,%s)
         """, (
             driver_id,
             request.form["driver_code"],
@@ -168,7 +172,9 @@ def add_driver():
             request.form.get("blood_group"),
             request.form.get("emergency_contact"),
             monthly_salary,
-            photo_path
+            photo_path,
+            request.form["name"],     # 👈 ADD
+            request.form["phone"]     # 👈 ADD
         ))
 
         # -------- DOCUMENT UPLOAD --------
@@ -245,6 +251,17 @@ def edit_driver(id):
             id,
             session["org_id"]
         ))
+        
+        cursor.execute("""
+            UPDATE driver_details
+            SET mobile_number=%s,
+                driver_full_name=%s
+            WHERE driver_id=%s
+        """, (
+            request.form["phone"],
+            request.form["name"],
+            id
+        ))
 
         cursor.execute("""
             UPDATE driver_details
@@ -320,7 +337,7 @@ def edit_driver(id):
 
         if photo and photo.filename and allowed_file(photo.filename):
 
-            # 🔹 Get old photo
+            # 🔹 Delete OLD photo
             cursor.execute("SELECT photo_path FROM driver_details WHERE driver_id=%s", (id,))
             old = cursor.fetchone()
 
@@ -329,8 +346,10 @@ def edit_driver(id):
                 if os.path.exists(old_file_path):
                     os.remove(old_file_path)
 
-            # 🔹 Save new photo
-            filename = secure_filename(f"{id}_photo_{photo.filename}")
+            # 🔹 Save NEW photo
+            ext = photo.filename.rsplit('.', 1)[1].lower()
+            filename = f"{id}_photo_{uuid.uuid4().hex}.{ext}"
+
             save_path = os.path.join(UPLOAD_FOLDER, filename)
             photo.save(save_path)
 
@@ -342,7 +361,6 @@ def edit_driver(id):
                 SET photo_path=%s
                 WHERE driver_id=%s
             """, (new_photo_path, id))
-
 
         db.commit()
         cursor.close()
@@ -416,6 +434,25 @@ def toggle_driver(id):
 def delete_driver(id):
     db, cursor = get_cursor()
 
+    # 🔹 Delete photo file FIRST
+    cursor.execute("SELECT photo_path FROM driver_details WHERE driver_id=%s", (id,))
+    photo = cursor.fetchone()
+
+    if photo and photo.get("photo_path"):
+        path = os.path.join("app/static", photo["photo_path"])
+        if os.path.exists(path):
+            os.remove(path)
+
+    # 🔹 Delete document files FIRST
+    cursor.execute("SELECT file_path FROM driver_documents WHERE driver_id=%s", (id,))
+    docs = cursor.fetchall()
+
+    for d in docs:
+        path = os.path.join("app/static", d["file_path"])
+        if os.path.exists(path):
+            os.remove(path)
+
+    # 🔹 THEN delete from database
     cursor.execute("DELETE FROM driver_documents WHERE driver_id=%s", (id,))
     cursor.execute("DELETE FROM driver_details WHERE driver_id=%s", (id,))
     cursor.execute(

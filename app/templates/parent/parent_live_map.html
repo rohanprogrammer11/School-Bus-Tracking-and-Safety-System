@@ -27,15 +27,13 @@
         }
     </style>
 
+    <!-- ✅ Rotation plugin (good you added this) -->
     <script src="https://unpkg.com/leaflet-rotatedmarker/leaflet.rotatedMarker.js"></script>
-
-    
 
 </head>
 <body>
 
 <div id="map"></div>
-
 
 <script>
     const busId = {{ bus_id }};
@@ -43,6 +41,14 @@
 </script>
 
 <script src="{{ url_for('static', filename='js/parent_map.js') }}"></script>
+
+<script>
+    // ✅ START TRACKING
+    fetchBusLocation();
+
+    // ✅ KEEP UPDATING (IMPORTANT)
+    setInterval(fetchBusLocation, 2000);
+</script>
 
 </body>
 </html>
